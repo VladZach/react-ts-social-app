@@ -1,13 +1,98 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
+}
+
+.page_centralized {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.card {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+  padding: 1em 1.5em 2em;
+  border: 1px solid rgb(228, 228, 228);
+  border-radius: 10px;
+  box-shadow: 0 5px 5px gainsboro;
+}
+
+.form__item {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 1em;
+  width: 100%;
+}
+
+.card__item {
+  width: 100%;
+}
+
+.card__form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card__footer {
+  text-align: center;
+  padding-top: 1em;
+}
+
+.card__header {
+  text-align: center;
+  font-size: 2.5rem;
+}
+
+.form__label {
+  padding-bottom: 0.5em;
+}
+
+.form__input {
+  border: 1px solid rgb(0, 0, 0);
+  border-radius: 5px;
+  font-size: 1rem;
+  line-height: 28px;
+}
+
+.form__input:focus {
+  outline-color: rgb(38, 132, 255);
+}
+
+.form__input_textual-sm {
+  padding: 0.3rem 0.7rem;
+}
+
+.button {
+  max-width: 120px;
+}
+
+.form__submit-button {
+  padding: 0.8rem 2rem;
+  border-radius: 5px;
+  border: 0;
+  background: rgb(38, 132, 255);
+  color: white;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.form__submit-button:hover {
+  background: rgb(30, 100, 192);
+  cursor: pointer;
 }
