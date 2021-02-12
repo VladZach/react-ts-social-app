@@ -1,20 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAuth } from "../contexts/AuthContext";
+import { formValues } from "./SignUp";
+import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-//TODO: перенести интерфейс в восстановление пароля, там будет просто email,
-//в остальных случаях наследоваться
-
-export interface formValues {
-  email?: string;
-  password?: string;
-  passwordConfirmation?: string;
-}
-
-export default function SignUp() {
+export default function Login() {
   //TODO: убрать any
-  const { signup }: any = useAuth();
+  const { login }: any = useAuth();
+  const history = useHistory();
+  const [submissionError, setSubmissionError] = useState("");
 
   function validate(values: formValues) {
     const errors: formValues = {};
@@ -28,24 +23,25 @@ export default function SignUp() {
     } else if (values.password && values.password.length < 6) {
       errors.password = "Password is shorter then 6 letters";
     }
-    if (!values.passwordConfirmation) {
-      errors.passwordConfirmation = "Required";
-    } else if (values.passwordConfirmation !== values.password) {
-      errors.passwordConfirmation = "Passwords doesn't match";
-    }
     return errors;
   }
 
   const form = (
     <Formik
-      initialValues={{ email: "", password: "", passwordConfirmation: "" }}
+      initialValues={{ email: "", password: "" }}
       validate={validate}
-      onSubmit={(values, { setSubmitting }) => {
-        signup(values.email, values.password);
+      onSubmit={async function (values, { setSubmitting }) {
+        try {
+          await login(values.email, values.password);
+          history.push("/");
+        } catch (e) {
+          setSubmissionError(e.message);
+        }
       }}
     >
       {({ isSubmitting }) => (
         <Form className="card__form card__item form">
+          <ErrorMessage name="serverResponse" component="div" />
           <div className="form__item">
             <label className="form__label" htmlFor="email">
               Email
@@ -68,21 +64,8 @@ export default function SignUp() {
             />
             <ErrorMessage name="password" component="div" />
           </div>
-          <div className="form__item">
-            <label className="form__label" htmlFor="password">
-              Password Confirmation
-            </label>
-            <Field
-              className="form__input form__input_textual-sm"
-              type="password"
-              name="passwordConfirmation"
-            />
-            {/* имя должно точно соответствовать имени свойства в объекте, то есть кэмэлКейс */}
-            <ErrorMessage name="passwordConfirmation" component="div" />
-          </div>
-
           <button className="button form__submit-button" type="submit">
-            Sign Up
+            Log in
           </button>
         </Form>
       )}
@@ -92,10 +75,11 @@ export default function SignUp() {
   return (
     <div className="page page_centralized">
       <div className="card">
-        <h2 className="card__item card__header">Sign Up</h2>
+        <h2 className="card__item card__header">Log in</h2>
+        {submissionError ? <div>{submissionError}</div> : ""}
         {form}
         <div className="card__footer card__item">
-          Already have an account? <Link to="/login">Login</Link>
+          Need an account? <Link to="/signup">Sign in</Link>
         </div>
       </div>
     </div>
