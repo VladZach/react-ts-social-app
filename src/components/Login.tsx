@@ -80,6 +80,7 @@ export default function Login() {
         {form}
         <div className="card__footer card__item">
           Need an account? <Link to="/signup">Sign in</Link>
+          <Link to="/reset-password">Forgot password?</Link>
         </div>
       </div>
     </div>

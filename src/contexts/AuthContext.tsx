@@ -41,6 +41,19 @@ export function AuthProvider({ children }: Props) {
   function logout() {
     return auth.signOut();
   }
+
+  function updateEmail(email: string) {
+    return currentUser?.updateEmail(email);
+  }
+
+  function updatePassword(password: string) {
+    return currentUser?.updatePassword(password);
+  }
+
+  function resetPassword(email: string) {
+    return auth.sendPasswordResetEmail(email);
+  }
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
@@ -57,6 +70,9 @@ export function AuthProvider({ children }: Props) {
     signup,
     login,
     logout,
+    updatePassword,
+    updateEmail,
+    resetPassword,
   };
   return (
     <AuthContext.Provider value={value}>
