@@ -1,5 +1,6 @@
 import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function SignUp() {
   interface formValues {
@@ -7,6 +8,8 @@ export default function SignUp() {
     password?: string;
     passwordConfirmation?: string;
   }
+
+  const { signup, currentUser }: any = useAuth();
 
   function validate(values: formValues) {
     const errors: formValues = {};
@@ -33,10 +36,7 @@ export default function SignUp() {
       initialValues={{ email: "", password: "", passwordConfirmation: "" }}
       validate={validate}
       onSubmit={(values, { setSubmitting }) => {
-        setTimeout(() => {
-          alert(JSON.stringify(values, null, 2));
-          setSubmitting(false);
-        }, 400);
+        signup(values.email, values.password);
       }}
     >
       {({ isSubmitting }) => (
@@ -87,6 +87,7 @@ export default function SignUp() {
   return (
     <div className="page page_centralized">
       <div className="card">
+        {JSON.stringify(currentUser.email)}
         <h2 className="card__item card__header">Sign Up</h2>
         {form}
         <div className="card__footer card__item">
