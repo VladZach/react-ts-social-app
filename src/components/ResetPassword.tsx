@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -9,6 +9,7 @@ export interface cardSMFormValues {
 
 export default function SignUp() {
   const { resetPassword } = useAuth();
+  const [submissionError, setSubmissionError] = useState("");
 
   function validate(values: cardSMFormValues) {
     const errors: cardSMFormValues = {};
@@ -24,8 +25,12 @@ export default function SignUp() {
     <Formik
       initialValues={{ email: "" }}
       validate={validate}
-      onSubmit={(values, { setSubmitting }) => {
-        resetPassword(values.email);
+      onSubmit={async function (values) {
+        try {
+          await resetPassword(values.email);
+        } catch (e) {
+          setSubmissionError(e.message);
+        }
       }}
     >
       {({ isSubmitting }) => (
@@ -58,6 +63,11 @@ export default function SignUp() {
     <div className="page page_centralized">
       <div className="card">
         <h2 className="card__item card__header">Reset Password</h2>
+        {submissionError ? (
+          <div className="form__error">{submissionError}</div>
+        ) : (
+          ""
+        )}
         {form}
         <div className="card__footer card__item">
           Remembered password?&nbsp;<Link to="/login">Login</Link>

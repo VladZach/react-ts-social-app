@@ -38,7 +38,7 @@ export default function Login() {
           await login(values.email, values.password);
           history.push("/");
         } catch (e) {
-          setSubmissionError(e.message);
+          setSubmissionError("Failed to log in. Check your email and password");
         }
       }}
     >
@@ -86,7 +86,11 @@ export default function Login() {
     <div className="page page_centralized">
       <div className="card">
         <h2 className="card__item card__header">Log in</h2>
-        {submissionError ? <div>{submissionError}</div> : ""}
+        {submissionError ? (
+          <div className="form__error">{submissionError}</div>
+        ) : (
+          ""
+        )}
         {form}
         <div className="card__footer card__item">
           <div className="card__footer_link">

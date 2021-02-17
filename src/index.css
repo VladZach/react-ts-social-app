@@ -115,6 +115,7 @@ code {
   font-style: italic;
   margin-top: 0.5rem;
   animation: appear 0.4s ease;
+  width: 100%;
 }
 
 @keyframes appear {

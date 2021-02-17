@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { cardMDFormValues } from "./Login";
 
 interface cardLGFormValues extends cardMDFormValues {
@@ -10,6 +11,10 @@ interface cardLGFormValues extends cardMDFormValues {
 
 export default function SignUp() {
   const { signup } = useAuth();
+
+  const [submissionError, setSubmissionError] = useState("");
+
+  const history = useHistory();
 
   function validate(values: cardLGFormValues) {
     const errors: cardLGFormValues = {};
@@ -35,8 +40,13 @@ export default function SignUp() {
     <Formik
       initialValues={{ email: "", password: "", passwordConfirmation: "" }}
       validate={validate}
-      onSubmit={(values, { setSubmitting }) => {
-        signup(values.email, values.password);
+      onSubmit={async function (values) {
+        try {
+          signup(values.email, values.password);
+          history.push("/");
+        } catch (e) {
+          setSubmissionError(e.message);
+        }
       }}
     >
       {({ isSubmitting }) => (
@@ -100,9 +110,14 @@ export default function SignUp() {
     <div className="page page_centralized">
       <div className="card">
         <h2 className="card__item card__header">Sign Up</h2>
+        {submissionError ? (
+          <div className="form__error">{submissionError}</div>
+        ) : (
+          ""
+        )}
         {form}
         <div className="card__footer card__item">
-          Already have an account? <Link to="/login">Login</Link>
+          Already have an account?&nbsp;<Link to="/login">Login</Link>
         </div>
       </div>
     </div>
