@@ -2,17 +2,17 @@ import firebase from "firebase";
 import React, { useContext, useState, useEffect, ReactChild } from "react";
 import { auth } from "../firebase";
 
-const AuthContext = React.createContext<null | Value>(null);
+const AuthContext = React.createContext<null | AuthContextValue>(null);
 
-export function useAuth() {
-  return useContext(AuthContext);
+export function useAuth(): AuthContextValue {
+  return useContext(AuthContext) as AuthContextValue;
 }
 
 interface Props {
   children: ReactChild;
 }
 
-export interface Value {
+export interface AuthContextValue {
   currentUser: firebase.User | null;
   signup: (
     email: string,
@@ -22,6 +22,10 @@ export interface Value {
     email: string,
     password: string
   ) => Promise<firebase.auth.UserCredential>;
+  logout: () => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
+  updateEmail: (email: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 export function AuthProvider({ children }: Props) {
@@ -43,11 +47,11 @@ export function AuthProvider({ children }: Props) {
   }
 
   function updateEmail(email: string) {
-    return currentUser?.updateEmail(email);
+    return currentUser!.updateEmail(email);
   }
 
   function updatePassword(password: string) {
-    return currentUser?.updatePassword(password);
+    return currentUser!.updatePassword(password);
   }
 
   function resetPassword(email: string) {

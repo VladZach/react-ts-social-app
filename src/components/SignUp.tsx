@@ -2,22 +2,17 @@ import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
+import { cardMDFormValues } from "./Login";
 
-//TODO: перенести интерфейс в восстановление пароля, там будет просто email,
-//в остальных случаях наследоваться
-
-export interface formValues {
-  email?: string;
-  password?: string;
+interface cardLGFormValues extends cardMDFormValues {
   passwordConfirmation?: string;
 }
 
 export default function SignUp() {
-  //TODO: убрать any
-  const { signup }: any = useAuth();
+  const { signup } = useAuth();
 
-  function validate(values: formValues) {
-    const errors: formValues = {};
+  function validate(values: cardLGFormValues) {
+    const errors: cardLGFormValues = {};
     if (!values.email) {
       errors.email = "Required";
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
@@ -55,7 +50,11 @@ export default function SignUp() {
               type="email"
               name="email"
             />
-            <ErrorMessage name="email" component="div" />
+            <ErrorMessage
+              name="email"
+              component="div"
+              className="form__error"
+            />
           </div>
           <div className="form__item">
             <label className="form__label" htmlFor="password">
@@ -66,7 +65,11 @@ export default function SignUp() {
               type="password"
               name="password"
             />
-            <ErrorMessage name="password" component="div" />
+            <ErrorMessage
+              name="password"
+              component="div"
+              className="form__error"
+            />
           </div>
           <div className="form__item">
             <label className="form__label" htmlFor="password">
@@ -78,7 +81,11 @@ export default function SignUp() {
               name="passwordConfirmation"
             />
             {/* имя должно точно соответствовать имени свойства в объекте, то есть кэмэлКейс */}
-            <ErrorMessage name="passwordConfirmation" component="div" />
+            <ErrorMessage
+              name="passwordConfirmation"
+              component="div"
+              className="form__error"
+            />
           </div>
 
           <button className="button form__submit-button" type="submit">

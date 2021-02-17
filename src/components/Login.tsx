@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAuth } from "../contexts/AuthContext";
-import { formValues } from "./SignUp";
 import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { cardSMFormValues } from "./ResetPassword";
+
+export interface cardMDFormValues extends cardSMFormValues {
+  password?: string;
+}
 
 export default function Login() {
-  //TODO: убрать any
-  const { login }: any = useAuth();
+  const { login } = useAuth();
   const history = useHistory();
   const [submissionError, setSubmissionError] = useState("");
 
-  function validate(values: formValues) {
-    const errors: formValues = {};
+  function validate(values: cardMDFormValues) {
+    const errors: cardMDFormValues = {};
     if (!values.email) {
       errors.email = "Required";
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
@@ -41,7 +44,6 @@ export default function Login() {
     >
       {({ isSubmitting }) => (
         <Form className="card__form card__item form">
-          <ErrorMessage name="serverResponse" component="div" />
           <div className="form__item">
             <label className="form__label" htmlFor="email">
               Email
@@ -51,7 +53,11 @@ export default function Login() {
               type="email"
               name="email"
             />
-            <ErrorMessage name="email" component="div" />
+            <ErrorMessage
+              name="email"
+              component="div"
+              className="form__error"
+            />
           </div>
           <div className="form__item">
             <label className="form__label" htmlFor="password">
@@ -62,7 +68,11 @@ export default function Login() {
               type="password"
               name="password"
             />
-            <ErrorMessage name="password" component="div" />
+            <ErrorMessage
+              name="password"
+              component="div"
+              className="form__error"
+            />
           </div>
           <button className="button form__submit-button" type="submit">
             Log in
@@ -79,8 +89,12 @@ export default function Login() {
         {submissionError ? <div>{submissionError}</div> : ""}
         {form}
         <div className="card__footer card__item">
-          Need an account? <Link to="/signup">Sign in</Link>
-          <Link to="/reset-password">Forgot password?</Link>
+          <div className="card__footer_link">
+            Need an account? <Link to="/signup">Sign in</Link>
+          </div>
+          <div className="card__footer_link">
+            <Link to="/reset-password">Forgot password?</Link>
+          </div>
         </div>
       </div>
     </div>

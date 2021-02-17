@@ -52,6 +52,14 @@ code {
 .card__footer {
   text-align: center;
   padding-top: 1em;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.card__footer_link {
+  width: 100%;
+  padding-top: 0.5em;
 }
 
 .card__header {
@@ -95,4 +103,27 @@ code {
 .form__submit-button:hover {
   background: rgb(30, 100, 192);
   cursor: pointer;
+}
+
+.form__error {
+  color: rgb(255, 56, 56);
+  border: 1px solid rgb(253, 67, 67);
+  background-color: rgb(255, 189, 189);
+  border-radius: 5px;
+  padding: 0.2rem 0.5rem;
+  font-weight: 300;
+  font-style: italic;
+  margin-top: 0.5rem;
+  animation: appear 0.4s ease;
+}
+
+@keyframes appear {
+  0% {
+    height: 0;
+    opacity: 0;
+  }
+  100% {
+    height: 100%;
+    opacity: 1;
+  }
 }
