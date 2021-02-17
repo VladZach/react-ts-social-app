@@ -7,6 +7,7 @@ import Login from "./Login";
 import PrivateRoute from "./PrivateRoute";
 import UpdateProfile from "./UpdateProfile";
 import ResetPassword from "./ResetPassword";
+import UnathorizedRoute from "./UnauthorizedRoute";
 
 function App() {
   return (
@@ -15,9 +16,18 @@ function App() {
         <AuthProvider>
           <Switch>
             <PrivateRoute exact path="/" component={UserPage}></PrivateRoute>
-            <Route path="/signup" component={SignUp}></Route>
-            <Route path="/login" component={Login}></Route>
-            <Route path="/update-profile" component={UpdateProfile}></Route>
+            <UnathorizedRoute
+              path="/signup"
+              component={SignUp}
+            ></UnathorizedRoute>
+            <UnathorizedRoute
+              path="/login"
+              component={Login}
+            ></UnathorizedRoute>
+            <UnathorizedRoute
+              path="/update-profile"
+              component={UpdateProfile}
+            ></UnathorizedRoute>
             <Route path="/reset-password" component={ResetPassword}></Route>
           </Switch>
         </AuthProvider>
