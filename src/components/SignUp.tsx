@@ -42,7 +42,7 @@ export default function SignUp() {
       validate={validate}
       onSubmit={async function (values) {
         try {
-          signup(values.email, values.password);
+          await signup(values.email, values.password);
           history.push("/");
         } catch (e) {
           setSubmissionError(e.message);
