@@ -3,93 +3,77 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 
-//TODO: перенести интерфейс в восстановление пароля, там будет просто email,
-//в остальных случаях наследоваться
-
-export interface formValues {
-  email?: string;
-  password?: string;
-  passwordConfirmation?: string;
-}
-
-export default function SignUp() {
-  //TODO: убрать any
-  const { updateEmail, updatePassword, currentUser }: any = useAuth();
+export default function UpdateProfile() {
+  const { currentUser } = useAuth();
 
   const history = useHistory();
 
-  function validate(values: formValues) {
-    const errors: formValues = {};
-    if (!values.email) {
-      errors.email = "Required";
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = "Invalid email address";
+  interface userProfileValues {
+    nickName?: string;
+    photo?: File;
+    aboutMe?: string;
+  }
+
+  function showImagePreview() {}
+
+  function validate(values: userProfileValues) {
+    const errors: userProfileValues = {};
+    if (!values.nickName) {
+      errors.nickName = "Required";
+    } else if (values.nickName.length > 4) {
+      errors.nickName = "Nickname is shorter than 4 letters";
     }
-    if (values.password && values.password.length < 6) {
-      errors.password = "Password is shorter then 6 letters";
-    }
-    if (!values.passwordConfirmation && values.password) {
-      errors.passwordConfirmation = "Required";
-    } else if (values.passwordConfirmation !== values.password) {
-      errors.passwordConfirmation = "Passwords doesn't match";
-    }
+    //@TODO проверять, не занят ли ник уже
     return errors;
   }
 
   const form = (
     <Formik
       initialValues={{
-        email: currentUser.email,
-        password: "",
-        passwordConfirmation: "",
+        nickName: "",
+        photo: undefined,
+        aboutMe: "",
       }}
       validate={validate}
       onSubmit={async function (values, { setSubmitting }) {
         const promises = [];
-        if (values.email !== currentUser.email) {
-          promises.push(updateEmail(values.email));
-        }
-        if (values.password) {
-          promises.push(updatePassword(values.password));
-        }
-        await Promise.all(promises);
+
         history.push("/");
       }}
     >
       {({ isSubmitting }) => (
         <Form className="card__form card__item form">
           <div className="form__item">
-            <label className="form__label" htmlFor="email">
-              Email
+            <label className="form__label" htmlFor="nickname">
+              Nickname
             </label>
             <Field
               className="form__input form__input_textual-sm"
-              type="email"
-              name="email"
+              type="text"
+              name="nickname"
+              placeholder="Nickname should be at least 4 letters long"
             />
-            <ErrorMessage name="email" component="div" />
+            <ErrorMessage
+              name="nickname"
+              component="div"
+              className="form__error"
+            />
           </div>
           <div className="form__item">
-            <label className="form__label" htmlFor="password">
-              Password
+            <label className="form__label" htmlFor="photo">
+              Photo
             </label>
-            <Field
-              className="form__input form__input_textual-sm"
-              type="password"
-              name="password"
-              placeholder="Leave blank to save old password"
-            />
-            <ErrorMessage name="password" component="div" />
+            <input type="file"></input>
           </div>
           <div className="form__item">
-            <label className="form__label" htmlFor="password">
-              Password Confirmation
+            <label className="form__label" htmlFor="aboutMe">
+              About Me
             </label>
             <Field
               className="form__input form__input_textual-sm"
-              type="password"
-              name="passwordConfirmation"
-              placeholder="Leave blank to save old password"
+              component="textarea"
+              name="aboutMe"
+              placeholder="Tell a bit about yourself"
             />
             {/* имя должно точно соответствовать имени свойства в объекте, то есть кэмэлКейс */}
             <ErrorMessage name="passwordConfirmation" component="div" />

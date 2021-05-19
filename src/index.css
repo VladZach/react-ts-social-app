@@ -1,8 +1,24 @@
+@font-face {
+  font-family: "8BIT WONDER";
+  src: local("8BIT WONDER"), url(./fonts/8bit.otf) format("opentype");
+  /* other formats include: 'woff2', 'truetype, 'opentype',
+                            'embedded-opentype', and 'svg' */
+}
+
+@font-face {
+  font-family: "AncientModernTales";
+  src: local("AncientModernTales"),
+    url(./fonts/AncientModernTales-a7Po.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "PerfectDos";
+  src: local("PerfectDos"), url(./fonts/PerfectDos.ttf) format("truetype");
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: "PerfectDos";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   box-sizing: border-box;
@@ -13,9 +29,17 @@ code {
     monospace;
 }
 
+.page {
+  background: url(bg.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .page_centralized {
   display: flex;
   justify-content: center;
+  flex-direction: column;
   align-items: center;
   min-height: 100vh;
 }
@@ -23,19 +47,19 @@ code {
 .card {
   display: flex;
   flex-wrap: wrap;
+  color: #ffffff;
+  max-width: 500px;
+  background-color: #000000;
   justify-content: center;
-  width: 100%;
-  max-width: 400px;
-  padding: 1em 1.5em 2em;
-  border: 1px solid rgb(228, 228, 228);
-  border-radius: 10px;
-  box-shadow: 0 5px 5px gainsboro;
+  border: 5px solid #ffffff;
+  padding: 1em 3em 2em;
+  box-shadow: 0px 4px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 .form__item {
   display: flex;
-  flex-direction: column;
-  padding-bottom: 1em;
+  align-items: center;
+  padding-bottom: 1.7em;
   width: 100%;
 }
 
@@ -68,22 +92,27 @@ code {
 }
 
 .form__label {
-  padding-bottom: 0.5em;
+  font-size: 22px;
+  width: 50%;
 }
 
 .form__input {
-  border: 1px solid rgb(0, 0, 0);
-  border-radius: 5px;
-  font-size: 1rem;
-  line-height: 28px;
+  color: white;
+  width: 100%;
+  justify-self: end;
+  max-width: 300px;
+  font-family: "PerfectDos";
+  font-size: 22px;
+  background-color: #000000;
+  border-width: 0;
 }
 
 .form__input:focus {
-  outline-color: rgb(38, 132, 255);
+  outline: none;
 }
 
 .form__input_textual-sm {
-  padding: 0.3rem 0.7rem;
+  padding: 0.3rem 0;
 }
 
 .button {
@@ -91,17 +120,15 @@ code {
 }
 
 .form__submit-button {
-  padding: 0.8rem 2rem;
-  border-radius: 5px;
   border: 0;
-  background: rgb(38, 132, 255);
+  font-family: "8BIT WONDER";
+  background: none;
   color: white;
-  font-weight: 600;
+  font-size: 16px;
   margin-top: 0.5rem;
 }
 
 .form__submit-button:hover {
-  background: rgb(30, 100, 192);
   cursor: pointer;
 }
 
@@ -118,13 +145,101 @@ code {
   width: 100%;
 }
 
-@keyframes appear {
-  0% {
-    height: 0;
-    opacity: 0;
-  }
-  100% {
-    height: 100%;
-    opacity: 1;
-  }
+.header {
+  height: 50px;
+  border-bottom: solid 2px #8dc5c1;
+  background-color: black;
+  display: flex;
+  align-items: center;
+  position: fixed;
+  width: 100%;
+}
+
+.container {
+  padding: 0 10em;
+}
+
+.header_logo {
+  font-family: "AncientModernTales";
+  font-size: 35px;
+  background: -webkit-linear-gradient(rgb(192, 192, 192) 3%, #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.start-screen-header {
+  font-family: "AncientModernTales";
+  letter-spacing: 0.3em;
+  display: flex;
+  flex-direction: column;
+}
+
+.start-screen-header__large-text {
+  font-size: 70px;
+  background: -webkit-linear-gradient(
+    rgb(255, 244, 143),
+    rgba(255, 230, 0, 0.4)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.start-screen-header__small-text {
+  font-size: 30px;
+  background: -webkit-linear-gradient(
+    rgb(255, 244, 143),
+    rgba(255, 230, 0, 0.4)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  align-self: flex-end;
+  margin-top: -40px;
+  margin-right: -15px;
+}
+
+.sceptic-guy {
+  width: 400px;
+}
+.sceptic-guy__text {
+  background: white;
+  min-height: 40px;
+  max-width: 250px;
+  border: solid 10px black;
+  border-radius: 20px;
+  font-size: 20px;
+  line-height: 40px;
+  text-align: center;
+  margin-bottom: 30px;
+  margin-left: -40px;
+  position: relative;
+}
+
+.sceptic-guy__text::before {
+  content: " ";
+  position: absolute;
+  right: -32px;
+  width: 0;
+  height: 0;
+  top: 23px;
+  border: 20px solid;
+  border-color: transparent transparent #000 #000;
+  transform: rotate(30deg);
+}
+
+.sceptic-guy__text::after {
+  content: " ";
+  position: absolute;
+  right: -20px;
+  width: 0;
+  height: 0;
+  top: 17px;
+  border: 17px solid;
+  border-color: transparent transparent #fff #fff;
+  transform: rotate(30deg);
+}
+
+.sceptic-guy__image {
+  width: 100%;
+  object-fit: cover;
+  padding-bottom: 30px;
 }

@@ -1,18 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAuth } from "../contexts/AuthContext";
-import { Link } from "react-router-dom";
-import { useHistory } from "react-router-dom";
-import { cardMDFormValues } from "./Login";
+import { Link, useHistory } from "react-router-dom";
+import { cardLGFormValues } from "./SignUp";
 
-export interface cardLGFormValues extends cardMDFormValues {
-  passwordConfirmation?: string;
-}
-
-export default function SignUp() {
-  const { signup } = useAuth();
-
-  const [submissionError, setSubmissionError] = useState("");
+export default function UpdateCre() {
+  const { updateEmail, updatePassword, currentUser } = useAuth();
 
   const history = useHistory();
 
@@ -23,12 +16,10 @@ export default function SignUp() {
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
       errors.email = "Invalid email address";
     }
-    if (!values.password) {
-      errors.password = "Required";
-    } else if (values.password && values.password.length < 6) {
+    if (values.password && values.password.length < 6) {
       errors.password = "Password is shorter then 6 letters";
     }
-    if (!values.passwordConfirmation) {
+    if (!values.passwordConfirmation && values.password) {
       errors.passwordConfirmation = "Required";
     } else if (values.passwordConfirmation !== values.password) {
       errors.passwordConfirmation = "Passwords doesn't match";
@@ -38,59 +29,66 @@ export default function SignUp() {
 
   const form = (
     <Formik
-      initialValues={{ email: "", password: "", passwordConfirmation: "" }}
+      initialValues={{
+        //благодаря состоянию loading в authContext, currentUser не может быть равен null
+        email: currentUser!.email as string,
+        password: "",
+        passwordConfirmation: "",
+      }}
       validate={validate}
-      onSubmit={async function (values) {
-        try {
-          await signup(values.email, values.password);
-          history.push("/");
-        } catch (e) {
-          setSubmissionError(e.message);
+      onSubmit={async function (values, { setSubmitting }) {
+        const promises = [];
+        if (values.email !== currentUser!.email) {
+          promises.push(updateEmail(values.email));
         }
+        if (values.password) {
+          promises.push(updatePassword(values.password));
+        }
+        await Promise.all(promises);
+        history.push("/");
       }}
     >
       {({ isSubmitting }) => (
         <Form className="card__form card__item form">
           <div className="form__item">
             <label className="form__label" htmlFor="email">
-              email:
+              Email
             </label>
             <Field
               className="form__input form__input_textual-sm"
               type="email"
               name="email"
-              autocomplete="off"
             />
-            <ErrorMessage
-              name="email"
-              component="div"
-              className="form__error"
-            />
+            <ErrorMessage name="email" component="div" />
           </div>
           <div className="form__item">
             <label className="form__label" htmlFor="password">
-              password:
+              Password
             </label>
             <Field
               className="form__input form__input_textual-sm"
               type="password"
               name="password"
+              placeholder="Leave blank to save old password"
             />
+            <ErrorMessage name="password" component="div" />
           </div>
           <div className="form__item">
             <label className="form__label" htmlFor="password">
-              password confirmation:
+              Password Confirmation
             </label>
             <Field
               className="form__input form__input_textual-sm"
               type="password"
               name="passwordConfirmation"
+              placeholder="Leave blank to save old password"
             />
             {/* имя должно точно соответствовать имени свойства в объекте, то есть кэмэлКейс */}
+            <ErrorMessage name="passwordConfirmation" component="div" />
           </div>
 
           <button className="button form__submit-button" type="submit">
-            ENTER
+            Update
           </button>
         </Form>
       )}
@@ -98,25 +96,12 @@ export default function SignUp() {
   );
 
   return (
-    <div className="page page_centralized container">
-      <div className="start-screen-header">
-        <h1 className="start-screen-header__large-text">Another Social App</h1>
-        <p className="start-screen-header__small-text">for portfolio</p>
-      </div>
-      <div className="sceptic-guy">
-        <div className="sceptic-guy__text">...really?</div>
-        <img className="sceptic-guy__image" src="./guy.gif" />
-      </div>
+    <div className="page page_centralized">
       <div className="card">
-        <h2 className="card__item card__header">Sign Up</h2>
-        {submissionError ? (
-          <div className="form__error">{submissionError}</div>
-        ) : (
-          ""
-        )}
+        <h2 className="card__item card__header">Update profile</h2>
         {form}
         <div className="card__footer card__item">
-          Already have an account?&nbsp;<Link to="/login">Login</Link>
+          <Link to="/">Cancel</Link>
         </div>
       </div>
     </div>

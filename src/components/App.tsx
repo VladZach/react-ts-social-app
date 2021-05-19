@@ -8,10 +8,13 @@ import PrivateRoute from "./PrivateRoute";
 import UpdateProfile from "./UpdateProfile";
 import ResetPassword from "./ResetPassword";
 import UnathorizedRoute from "./UnauthorizedRoute";
+import UpdateCredentials from "./UpdateCredentials";
+import Header from "./Header";
 
 function App() {
   return (
     <>
+      <Header></Header>
       <Router>
         <AuthProvider>
           <Switch>
@@ -24,11 +27,18 @@ function App() {
               path="/login"
               component={Login}
             ></UnathorizedRoute>
-            <UnathorizedRoute
+            <PrivateRoute
+              path="/update-credentials"
+              component={UpdateCredentials}
+            ></PrivateRoute>
+            <PrivateRoute
+              path="/reset-password"
+              component={ResetPassword}
+            ></PrivateRoute>
+            <PrivateRoute
               path="/update-profile"
               component={UpdateProfile}
-            ></UnathorizedRoute>
-            <Route path="/reset-password" component={ResetPassword}></Route>
+            ></PrivateRoute>
           </Switch>
         </AuthProvider>
       </Router>
