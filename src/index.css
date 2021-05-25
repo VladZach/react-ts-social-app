@@ -16,17 +16,14 @@
   src: local("PerfectDos"), url(./fonts/PerfectDos.ttf) format("truetype");
 }
 
+/* ------- general ------- */
+
 body {
   margin: 0;
   font-family: "PerfectDos";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   box-sizing: border-box;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
 }
 
 .page {
@@ -41,26 +38,95 @@ code {
   justify-content: center;
   flex-direction: column;
   align-items: center;
-  min-height: 100vh;
 }
+
+.header {
+  height: 50px;
+  border-bottom: solid 2px #8dc5c1;
+  background-color: black;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header_logo {
+  font-family: "AncientModernTales";
+  font-size: 35px;
+  background: -webkit-linear-gradient(rgb(192, 192, 192) 3%, #fff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.button {
+  max-width: 120px;
+}
+
+.container {
+  padding-left: 10em;
+  padding-right: 10em;
+}
+
+/* ------- welcome-page -------- */
+
+.page_welcome-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.welcome-page-header {
+  font-family: "AncientModernTales";
+  letter-spacing: 0.3em;
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-page-header__large-text {
+  font-size: 4.5vw;
+  margin-top: 20px;
+  background: -webkit-linear-gradient(
+    rgb(255, 244, 143),
+    rgba(255, 230, 0, 0.4)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.welcome-page-header__small-text {
+  font-size: 2vw;
+  background: -webkit-linear-gradient(
+    rgb(255, 244, 143),
+    rgba(255, 230, 0, 0.4)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  align-self: flex-end;
+  margin-top: -35px;
+  margin-right: -15px;
+}
+
+/* ------ card ------- */
 
 .card {
   display: flex;
   flex-wrap: wrap;
   color: #ffffff;
-  max-width: 500px;
+  width: 25vw;
   background-color: #000000;
   justify-content: center;
-  border: 5px solid #ffffff;
+  border: 0.5vw solid #ffffff;
   padding: 1em 3em 2em;
   box-shadow: 0px 4px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
-.form__item {
-  display: flex;
-  align-items: center;
-  padding-bottom: 1.7em;
-  width: 100%;
+.card__header {
+  text-align: center;
+  font-size: 2vw;
+  margin-bottom: 0.9rem;
+  margin-top: 0.5rem;
 }
 
 .card__item {
@@ -73,36 +139,27 @@ code {
   justify-content: center;
 }
 
-.card__footer {
-  text-align: center;
-  padding-top: 1em;
+/* ------- form -------- */
+
+.form__item {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.card__footer_link {
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1.1em;
   width: 100%;
-  padding-top: 0.5em;
-}
-
-.card__header {
-  text-align: center;
-  font-size: 2.5rem;
 }
 
 .form__label {
-  font-size: 22px;
+  font-size: 1.5vw;
   width: 50%;
 }
 
 .form__input {
   color: white;
-  width: 100%;
   justify-self: end;
-  max-width: 300px;
+  max-width: 150px;
   font-family: "PerfectDos";
-  font-size: 22px;
+  font-size: 1.5vw;
   background-color: #000000;
   border-width: 0;
 }
@@ -115,17 +172,13 @@ code {
   padding: 0.3rem 0;
 }
 
-.button {
-  max-width: 120px;
-}
-
 .form__submit-button {
   border: 0;
   font-family: "8BIT WONDER";
   background: none;
   color: white;
-  font-size: 16px;
-  margin-top: 0.5rem;
+  font-size: 1.1vw;
+  margin-top: 0.2rem;
 }
 
 .form__submit-button:hover {
@@ -145,101 +198,268 @@ code {
   width: 100%;
 }
 
-.header {
-  height: 50px;
-  border-bottom: solid 2px #8dc5c1;
-  background-color: black;
-  display: flex;
-  align-items: center;
-  position: fixed;
-  width: 100%;
-}
-
-.container {
-  padding: 0 10em;
-}
-
-.header_logo {
-  font-family: "AncientModernTales";
-  font-size: 35px;
-  background: -webkit-linear-gradient(rgb(192, 192, 192) 3%, #fff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.start-screen-header {
-  font-family: "AncientModernTales";
-  letter-spacing: 0.3em;
-  display: flex;
-  flex-direction: column;
-}
-
-.start-screen-header__large-text {
-  font-size: 70px;
-  background: -webkit-linear-gradient(
-    rgb(255, 244, 143),
-    rgba(255, 230, 0, 0.4)
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.start-screen-header__small-text {
-  font-size: 30px;
-  background: -webkit-linear-gradient(
-    rgb(255, 244, 143),
-    rgba(255, 230, 0, 0.4)
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  align-self: flex-end;
-  margin-top: -40px;
-  margin-right: -15px;
-}
+/* --------- sceptic guy ---------- */
 
 .sceptic-guy {
-  width: 400px;
-}
-.sceptic-guy__text {
-  background: white;
-  min-height: 40px;
-  max-width: 250px;
-  border: solid 10px black;
-  border-radius: 20px;
-  font-size: 20px;
-  line-height: 40px;
-  text-align: center;
-  margin-bottom: 30px;
-  margin-left: -40px;
-  position: relative;
+  width: 50vh;
+  margin-top: -35px;
 }
 
-.sceptic-guy__text::before {
-  content: " ";
+.sceptic-guy__thought-bubble {
   position: absolute;
-  right: -32px;
-  width: 0;
-  height: 0;
-  top: 23px;
-  border: 20px solid;
-  border-color: transparent transparent #000 #000;
-  transform: rotate(30deg);
-}
-
-.sceptic-guy__text::after {
-  content: " ";
-  position: absolute;
-  right: -20px;
-  width: 0;
-  height: 0;
-  top: 17px;
-  border: 17px solid;
-  border-color: transparent transparent #fff #fff;
-  transform: rotate(30deg);
+  right: -40px;
+  width: 150px;
+  margin-bottom: 20px;
 }
 
 .sceptic-guy__image {
   width: 100%;
-  object-fit: cover;
-  padding-bottom: 30px;
+  object-fit: contain;
+  padding-bottom: 20px;
+}
+
+/* ------------  thought-bubble --------------*/
+
+.thought-bubble {
+  position: relative;
+  z-index: 1;
+}
+
+.thought-bubble__body {
+  position: relative;
+  border: solid black 10px;
+  padding: 0.5em 1em;
+  width: auto;
+  text-align: center;
+  border-radius: 40px 40px 0 40px;
+  background: white;
+}
+.thought-bubble__text {
+  position: relative;
+  z-index: 2;
+}
+
+.thought-bubble__decoration-black {
+  position: absolute;
+  bottom: -19px;
+  right: 0;
+  box-sizing: border-box;
+  border: solid black;
+  height: 0;
+  width: 0;
+  border-width: 20px 20px;
+  border-radius: 0px 0px 20px 20px;
+  z-index: -1;
+}
+
+.thought-bubble__decoration-black::after {
+  display: block;
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: -20px;
+  right: -2px;
+  border-right: 17px solid black;
+  border-top: 17px solid black;
+  border-radius: 0 100px 0 100px;
+}
+
+.thought-bubble__decoration-white {
+  position: absolute;
+  box-sizing: border-box;
+  border: solid white;
+  height: 0;
+  z-index: 100;
+  width: 0;
+  bottom: -9px;
+  right: 10px;
+  border-width: 18px 11px;
+  border-radius: 0px 0px 25px 25px;
+  z-index: 1;
+  transform: rotate(-2deg);
+}
+
+.thought-bubble__decoration-white::after {
+  display: block;
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 18px;
+  top: -20px;
+  right: -2.5px;
+  border-right: 12px solid white;
+  border-top: 17px solid white;
+  border-radius: 0 100px 0 100px;
+}
+
+@media screen and (max-width: 1224px) {
+  .container {
+    padding: 0 8em;
+  }
+  .sceptic-guy {
+    width: 35vw;
+  }
+  .sceptic-guy__thought-bubble {
+    right: -80px;
+  }
+  .welcome-page-header__large-text {
+    font-size: 3.5em;
+  }
+
+  .welcome-page-header__small-text {
+    font-size: 1.5em;
+  }
+  .card {
+    width: 35vw;
+  }
+  .card__header {
+    font-size: 1.8em;
+  }
+
+  .form__label {
+    font-size: 1.2em;
+  }
+
+  .form__input {
+    font-size: 1.2em;
+  }
+
+  .form__submit-button {
+    font-size: 1.1em;
+  }
+}
+
+@media screen and (min-width: 2100px) {
+  .form__input {
+    max-width: 300px;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  .sceptic-guy__thought-bubble {
+    right: -40px;
+  }
+}
+
+@media screen and (max-width: 790px) {
+  .container {
+    padding: 0 5em;
+  }
+  .sceptic-guy {
+    width: 45vw;
+  }
+
+  .welcome-page-header__large-text {
+    font-size: 2.9em;
+  }
+
+  .welcome-page-header__small-text {
+    font-size: 1.3em;
+    margin-top: -23px;
+  }
+  .card {
+    width: 47vw;
+    padding: 0.7em 2.5em 1.7em;
+    border-width: 5px;
+  }
+  .card__header {
+    font-size: 1.6em;
+  }
+
+  .form__label {
+    font-size: 1.1em;
+  }
+
+  .form__input {
+    font-size: 1.1em;
+  }
+
+  .form__submit-button {
+    font-size: 0.9em;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .sceptic-guy__thought-bubble {
+    right: -10px;
+  }
+}
+
+@media screen and (max-width: 546px) {
+  .container {
+    padding: 0 2em;
+  }
+  .sceptic-guy {
+    width: 70vw;
+  }
+  .sceptic-guy__thought-bubble {
+    right: -70px;
+  }
+  .welcome-page-header__large-text {
+    font-size: 2.3em;
+  }
+
+  .welcome-page-header__small-text {
+    font-size: 1.2em;
+    margin-top: -23px;
+  }
+  .card {
+    width: auto;
+    padding: 0.7em 2em 1.7em;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .sceptic-guy__thought-bubble {
+    right: -30px;
+  }
+}
+
+@media screen and (max-width: 390px) {
+  .container {
+    padding: 0 1em;
+  }
+  .sceptic-guy {
+    width: 80vw;
+  }
+  .sceptic-guy__thought-bubble {
+    right: -10px;
+  }
+
+  .sceptic-guy__image {
+    padding-bottom: 0;
+  }
+  .welcome-page-header__large-text {
+    font-size: 1.9em;
+  }
+
+  .form__input {
+    max-width: 90px;
+  }
+
+  .welcome-page-header__small-text {
+    font-size: 1.1em;
+    margin-top: -17px;
+  }
+  .card {
+    width: auto;
+    padding: 0.7em 1.5em 1.7em;
+  }
+  .form__label {
+    font-size: 1em;
+  }
+
+  .form__input {
+    font-size: 1em;
+  }
+}
+
+@media screen and (max-width: 315px) {
+  .welcome-page-header__large-text {
+    font-size: 1.5em;
+  }
+  .sceptic-guy__thought-bubble {
+    right: 10px;
+  }
 }

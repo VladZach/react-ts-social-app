@@ -98,13 +98,20 @@ export default function SignUp() {
   );
 
   return (
-    <div className="page page_centralized container">
-      <div className="start-screen-header">
-        <h1 className="start-screen-header__large-text">Another Social App</h1>
-        <p className="start-screen-header__small-text">for portfolio</p>
+    <div className="page page_welcome-page page_centralized container">
+      <div className="welcome-page-header">
+        <h1 className="welcome-page-header__large-text">Another Social App</h1>
+        <p className="welcome-page-header__small-text">for portfolio</p>
       </div>
+
       <div className="sceptic-guy">
-        <div className="sceptic-guy__text">...really?</div>
+        <div className="thought-bubble sceptic-guy__thought-bubble">
+          <div className="thought-bubble__body">
+            <span className="thought-bubble__text">...really?</span>
+          </div>
+          <div className="thought-bubble__decoration-black"></div>
+          <div className="thought-bubble__decoration-white"></div>
+        </div>
         <img className="sceptic-guy__image" src="./guy.gif" />
       </div>
       <div className="card">
@@ -115,9 +122,6 @@ export default function SignUp() {
           ""
         )}
         {form}
-        <div className="card__footer card__item">
-          Already have an account?&nbsp;<Link to="/login">Login</Link>
-        </div>
       </div>
     </div>
   );
