@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import { cardMDFormValues } from "./Login";
+import WelcomePage from "./WelcomePage";
 
 export interface cardLGFormValues extends cardMDFormValues {
   passwordConfirmation?: string;
@@ -13,32 +14,34 @@ export default function SignUp() {
   const { signup } = useAuth();
 
   const [submissionError, setSubmissionError] = useState("");
-
+  const [errors, setErrors] = useState<Array<string>>([]);
   const history = useHistory();
-
   function validate(values: cardLGFormValues) {
-    const errors: cardLGFormValues = {};
+    const errors: Array<string> = [];
     if (!values.email) {
-      errors.email = "Required";
+      errors.push("Email is required");
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = "Invalid email address";
+      errors.push("Invalid email address");
     }
     if (!values.password) {
-      errors.password = "Required";
+      errors.push("Password is required");
     } else if (values.password && values.password.length < 6) {
-      errors.password = "Password is shorter then 6 letters";
+      errors.push("Password is shorter then 6 letters");
     }
     if (!values.passwordConfirmation) {
-      errors.passwordConfirmation = "Required";
+      errors.push("Password confirmation is required");
     } else if (values.passwordConfirmation !== values.password) {
-      errors.passwordConfirmation = "Passwords doesn't match";
+      errors.push("Passwords doesn't match");
     }
+    setErrors(errors);
     return errors;
   }
 
   const form = (
     <Formik
       initialValues={{ email: "", password: "", passwordConfirmation: "" }}
+      validateOnBlur={false}
+      validateOnChange={false}
       validate={validate}
       onSubmit={async function (values) {
         try {
@@ -50,7 +53,7 @@ export default function SignUp() {
       }}
     >
       {({ isSubmitting }) => (
-        <Form className="card__form card__item form">
+        <Form noValidate className="card__form card__item form">
           <div className="form__item">
             <label className="form__label" htmlFor="email">
               email:
@@ -59,12 +62,7 @@ export default function SignUp() {
               className="form__input form__input_textual-sm"
               type="email"
               name="email"
-              autocomplete="off"
-            />
-            <ErrorMessage
-              name="email"
-              component="div"
-              className="form__error"
+              autoComplete="off"
             />
           </div>
           <div className="form__item">
@@ -79,18 +77,16 @@ export default function SignUp() {
           </div>
           <div className="form__item">
             <label className="form__label" htmlFor="password">
-              password confirmation:
+              password again:
             </label>
             <Field
               className="form__input form__input_textual-sm"
               type="password"
               name="passwordConfirmation"
             />
-            {/* имя должно точно соответствовать имени свойства в объекте, то есть кэмэлКейс */}
           </div>
-
           <button className="button form__submit-button" type="submit">
-            ENTER
+            enter
           </button>
         </Form>
       )}
@@ -98,31 +94,10 @@ export default function SignUp() {
   );
 
   return (
-    <div className="page page_welcome-page page_centralized container">
-      <div className="welcome-page-header">
-        <h1 className="welcome-page-header__large-text">Another Social App</h1>
-        <p className="welcome-page-header__small-text">for portfolio</p>
-      </div>
-
-      <div className="sceptic-guy">
-        <div className="thought-bubble sceptic-guy__thought-bubble">
-          <div className="thought-bubble__body">
-            <span className="thought-bubble__text">...really?</span>
-          </div>
-          <div className="thought-bubble__decoration-black"></div>
-          <div className="thought-bubble__decoration-white"></div>
-        </div>
-        <img className="sceptic-guy__image" src="./guy.gif" />
-      </div>
-      <div className="card">
-        <h2 className="card__item card__header">Sign Up</h2>
-        {submissionError ? (
-          <div className="form__error">{submissionError}</div>
-        ) : (
-          ""
-        )}
-        {form}
-      </div>
-    </div>
+    <WelcomePage
+      form={form}
+      submissionError={submissionError}
+      errors={errors}
+    ></WelcomePage>
   );
 }

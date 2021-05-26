@@ -30,10 +30,10 @@ function App() {
               path="/update-credentials"
               component={UpdateCredentials}
             ></PrivateRoute>
-            <PrivateRoute
+            <UnathorizedRoute
               path="/reset-password"
               component={ResetPassword}
-            ></PrivateRoute>
+            ></UnathorizedRoute>
             <PrivateRoute
               path="/update-profile"
               component={UpdateProfile}

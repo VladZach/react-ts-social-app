@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
+import WelcomePage from "./WelcomePage";
 
 export interface cardSMFormValues {
   email?: string;
@@ -10,13 +11,13 @@ export interface cardSMFormValues {
 export default function SignUp() {
   const { resetPassword } = useAuth();
   const [submissionError, setSubmissionError] = useState("");
-
+  const [errors, setErrors] = useState<Array<string>>([]);
   function validate(values: cardSMFormValues) {
-    const errors: cardSMFormValues = {};
+    setErrors([]);
     if (!values.email) {
-      errors.email = "Required";
+      setErrors((errors) => [...errors, "Email is required"]);
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = "Invalid email address";
+      setErrors((errors) => [...errors, "Invalid email address"]);
     }
     return errors;
   }
@@ -60,19 +61,10 @@ export default function SignUp() {
   );
 
   return (
-    <div className="page page_centralized">
-      <div className="card">
-        <h2 className="card__item card__header">Reset Password</h2>
-        {submissionError ? (
-          <div className="form__error">{submissionError}</div>
-        ) : (
-          ""
-        )}
-        {form}
-        <div className="card__footer card__item">
-          Remembered password?&nbsp;<Link to="/login">Login</Link>
-        </div>
-      </div>
-    </div>
+    <WelcomePage
+      form={form}
+      submissionError={submissionError}
+      errors={errors}
+    ></WelcomePage>
   );
 }

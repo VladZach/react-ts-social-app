@@ -33,6 +33,10 @@ body {
   background-size: cover;
 }
 
+.page_welcome-page {
+  height: 100v;
+}
+
 .page_centralized {
   display: flex;
   justify-content: center;
@@ -71,7 +75,7 @@ body {
 /* ------- welcome-page -------- */
 
 .page_welcome-page {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -151,13 +155,12 @@ body {
 
 .form__label {
   font-size: 1.5vw;
-  width: 50%;
+  width: 40%;
 }
 
 .form__input {
-  color: white;
-  justify-self: end;
-  max-width: 150px;
+  color: rgb(255, 255, 255);
+  width: 60%;
   font-family: "PerfectDos";
   font-size: 1.5vw;
   background-color: #000000;
@@ -206,9 +209,11 @@ body {
 }
 
 .sceptic-guy__thought-bubble {
+  display: inline-block;
   position: absolute;
-  right: -40px;
-  width: 150px;
+  right: 150px;
+  width: auto;
+  float: right;
   margin-bottom: 20px;
 }
 
@@ -301,7 +306,7 @@ body {
     width: 35vw;
   }
   .sceptic-guy__thought-bubble {
-    right: -80px;
+    right: 150px;
   }
   .welcome-page-header__large-text {
     font-size: 3.5em;
@@ -338,7 +343,7 @@ body {
 
 @media screen and (max-width: 1000px) {
   .sceptic-guy__thought-bubble {
-    right: -40px;
+    right: 130px;
   }
 }
 
@@ -382,7 +387,7 @@ body {
 
 @media screen and (max-width: 640px) {
   .sceptic-guy__thought-bubble {
-    right: -10px;
+    right: 110px;
   }
 }
 
@@ -394,7 +399,8 @@ body {
     width: 70vw;
   }
   .sceptic-guy__thought-bubble {
-    right: -70px;
+    right: 160px;
+    max-width: 250px;
   }
   .welcome-page-header__large-text {
     font-size: 2.3em;
@@ -412,7 +418,8 @@ body {
 
 @media screen and (max-width: 480px) {
   .sceptic-guy__thought-bubble {
-    right: -30px;
+    right: 140px;
+    max-width: 200px;
   }
 }
 
@@ -424,7 +431,8 @@ body {
     width: 80vw;
   }
   .sceptic-guy__thought-bubble {
-    right: -10px;
+    right: 130px;
+    max-width: 150px;
   }
 
   .sceptic-guy__image {
@@ -460,6 +468,6 @@ body {
     font-size: 1.5em;
   }
   .sceptic-guy__thought-bubble {
-    right: 10px;
+    right: 90px;
   }
 }

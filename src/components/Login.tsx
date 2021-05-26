@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { cardSMFormValues } from "./ResetPassword";
+import WelcomePage from "./WelcomePage";
 
 export interface cardMDFormValues extends cardSMFormValues {
   password?: string;
@@ -13,18 +14,18 @@ export default function Login() {
   const { login } = useAuth();
   const history = useHistory();
   const [submissionError, setSubmissionError] = useState("");
-
+  const [errors, setErrors] = useState<Array<string>>([]);
   function validate(values: cardMDFormValues) {
-    const errors: cardMDFormValues = {};
+    setErrors([]);
     if (!values.email) {
-      errors.email = "Required";
+      setErrors((errors) => [...errors, "Email is required"]);
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors.email = "Invalid email address";
+      setErrors((errors) => [...errors, "Invalid email address"]);
     }
     if (!values.password) {
-      errors.password = "Required";
+      setErrors((errors) => [...errors, "Password is required"]);
     } else if (values.password && values.password.length < 6) {
-      errors.password = "Password is shorter then 6 letters";
+      setErrors((errors) => [...errors, "Password is shorter then 6 letters"]);
     }
     return errors;
   }
@@ -75,7 +76,7 @@ export default function Login() {
             />
           </div>
           <button className="button form__submit-button" type="submit">
-            Log in
+            enter
           </button>
         </Form>
       )}
@@ -83,24 +84,10 @@ export default function Login() {
   );
 
   return (
-    <div className="page page_centralized">
-      <div className="card">
-        <h2 className="card__item card__header">Log in</h2>
-        {submissionError ? (
-          <div className="form__error">{submissionError}</div>
-        ) : (
-          ""
-        )}
-        {form}
-        <div className="card__footer card__item">
-          <div className="card__footer_link">
-            Need an account? <Link to="/signup">Sign in</Link>
-          </div>
-          <div className="card__footer_link">
-            <Link to="/reset-password">Forgot password?</Link>
-          </div>
-        </div>
-      </div>
-    </div>
+    <WelcomePage
+      form={form}
+      submissionError={submissionError}
+      errors={errors}
+    ></WelcomePage>
   );
 }
