@@ -75,9 +75,14 @@ export default function Login() {
               className="form__error"
             />
           </div>
-          <button className="button form__submit-button" type="submit">
-            enter
-          </button>
+          <div className="form__footer">
+            <Link className="button form__submit-button" to="/start-screen">
+              back
+            </Link>
+            <button className="button form__submit-button" type="submit">
+              enter
+            </button>
+          </div>
         </Form>
       )}
     </Formik>

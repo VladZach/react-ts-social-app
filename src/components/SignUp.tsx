@@ -33,6 +33,7 @@ export default function SignUp() {
     } else if (values.passwordConfirmation !== values.password) {
       errors.push("Passwords doesn't match");
     }
+    //Так как сообщения об ошибке находятся вне формы, храним их в состоянии и передаём пропсом
     setErrors(errors);
     return errors;
   }
@@ -85,9 +86,14 @@ export default function SignUp() {
               name="passwordConfirmation"
             />
           </div>
-          <button className="button form__submit-button" type="submit">
-            enter
-          </button>
+          <div className="form__footer">
+            <Link className="button form__submit-button" to="/start-screen">
+              back
+            </Link>
+            <button className="button form__submit-button" type="submit">
+              enter
+            </button>
+          </div>
         </Form>
       )}
     </Formik>

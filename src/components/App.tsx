@@ -10,6 +10,7 @@ import ResetPassword from "./ResetPassword";
 import UnathorizedRoute from "./UnauthorizedRoute";
 import UpdateCredentials from "./UpdateCredentials";
 import Header from "./Header";
+import StartScreen from "./StartScreen";
 
 function App() {
   return (
@@ -18,6 +19,10 @@ function App() {
         <AuthProvider>
           <Switch>
             <PrivateRoute exact path="/" component={UserPage}></PrivateRoute>
+            <UnathorizedRoute
+              path="/start-screen"
+              component={StartScreen}
+            ></UnathorizedRoute>
             <UnathorizedRoute
               path="/signup"
               component={SignUp}

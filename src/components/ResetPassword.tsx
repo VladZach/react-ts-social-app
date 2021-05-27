@@ -51,10 +51,14 @@ export default function SignUp() {
               className="form__error"
             />
           </div>
-
-          <button className="button form__submit-button" type="submit">
-            Reset
-          </button>
+          <div className="form__footer">
+            <Link className="button form__submit-button" to="/start-screen">
+              back
+            </Link>
+            <button className="button form__submit-button" type="submit">
+              reset
+            </button>
+          </div>
         </Form>
       )}
     </Formik>

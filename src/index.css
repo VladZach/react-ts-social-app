@@ -129,12 +129,12 @@ body {
 .card__header {
   text-align: center;
   font-size: 2vw;
-  margin-bottom: 0.9rem;
+  margin-bottom: 2rem;
   margin-top: 0.5rem;
 }
 
 .card__item {
-  width: 100%;
+  flex-basis: 100%;
 }
 
 .card__form {
@@ -143,11 +143,75 @@ body {
   justify-content: center;
 }
 
+.card__link {
+  font-size: 1.3vw;
+  font-family: "8BIT WONDER";
+  padding-bottom: 1.5em;
+  text-align: center;
+  outline: none;
+  text-decoration: none;
+}
+
+.card__item_with-hand {
+  display: inline-block;
+  position: relative;
+}
+
+.form__item:hover.form__item::after {
+  display: block;
+  position: absolute;
+  content: " ";
+  left: -38px;
+  top: -2px;
+  width: 30px;
+  height: 30px;
+  background-image: url("hand.gif");
+  background-repeat: no-repeat;
+  background-size: 30px 30px;
+}
+
+.card__link:hover > .card__item_with-hand::after,
+.card__link:focus > .card__item_with-hand::after {
+  display: block;
+  position: absolute;
+  content: " ";
+  left: -40px;
+  top: -5px;
+  width: 30px;
+  height: 30px;
+  background-image: url("hand.gif");
+  background-repeat: no-repeat;
+  background-size: 30px 30px;
+}
+
+.form__submit-button:hover.form__submit-button::after,
+.form__submit-button:focus.form__submit-button::after {
+  display: block;
+  position: absolute;
+  content: " ";
+  left: -40px;
+  top: -6px;
+  width: 30px;
+  height: 30px;
+  background-image: url("hand.gif");
+  background-repeat: no-repeat;
+  background-size: 30px 30px;
+}
+
+.card__link:last-child {
+  padding-bottom: 0.7em;
+}
+
+.card__link:visited {
+  color: white;
+}
+
 /* ------- form -------- */
 
 .form__item {
   display: flex;
   align-items: center;
+  position: relative;
   justify-content: space-between;
   padding-bottom: 1.1em;
   width: 100%;
@@ -175,13 +239,24 @@ body {
   padding: 0.3rem 0;
 }
 
+.form__footer {
+  display: flex;
+  justify-content: space-around;
+  width: 80%;
+}
+
 .form__submit-button {
   border: 0;
+  display: flex;
+  position: relative;
+  align-items: center;
   font-family: "8BIT WONDER";
   background: none;
   color: white;
   font-size: 1.1vw;
-  margin-top: 0.2rem;
+  text-decoration: none;
+  outline: none;
+  padding: 0;
 }
 
 .form__submit-button:hover {
