@@ -31,6 +31,7 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  min-height: 100vh;
 }
 
 .page_welcome-page {
@@ -68,8 +69,8 @@ body {
 }
 
 .container {
-  padding-left: 10em;
-  padding-right: 10em;
+  padding-left: 12vw;
+  padding-right: 12vw;
 }
 
 /* ------- welcome-page -------- */
@@ -350,7 +351,6 @@ body {
   box-sizing: border-box;
   border: solid white;
   height: 0;
-  z-index: 100;
   width: 0;
   bottom: -9px;
   right: 10px;
@@ -373,9 +373,248 @@ body {
   border-radius: 0 100px 0 100px;
 }
 
+/** ---------- user-profile ----------- **/
+
+.user-profile {
+  border: 16px solid black;
+  display: flex;
+  padding: 1em 1.2em;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 2em;
+  margin-top: 2.5em;
+}
+
+.user-info__header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.user-profile:hover .stone-bordered {
+  border: 10px solid white;
+}
+
+.user-profile:hover .controls {
+  display: block;
+}
+
+.user-profile::after {
+  content: "";
+  background: url("../src/background-noise.png");
+  background-size: 50px;
+  opacity: 0.4;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+.user-profile__avatar {
+  width: 225px;
+  height: 225px;
+}
+
+.stone-bordered {
+  border: 10px solid white;
+  border-image: url("../src/border.png");
+  border-image-slice: 90 140;
+  border-image-repeat: round;
+}
+.user-info {
+  background: black;
+  color: white;
+}
+
+.user-profile__info {
+  margin-left: 1em;
+  padding: 1.2em;
+}
+
+.user-name {
+  font-family: "8BIT WONDER";
+}
+
+.user-info__name {
+  font-size: 20px;
+  margin-top: 0;
+}
+.user-info__text {
+  display: flex;
+  margin-bottom: 1em;
+}
+
+.user-text__header {
+  font-family: "8BIT WONDER";
+  font-size: 16px;
+  min-width: 140px;
+}
+
+.user-text__text {
+  font-size: 20px;
+  padding-left: 1em;
+}
+
+/** -------wall--------- **/
+
+.wall {
+  padding: 1.3em 0.9em;
+  border: 18px solid black;
+  background: url("../src/wall-background.png");
+  background-size: 102px;
+}
+
+.wall__form {
+  margin-bottom: 1em;
+  padding: 0.6em 1.8em;
+  background: black;
+  color: white;
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 46px;
+  justify-content: space-between;
+  transition: all 0.5s;
+}
+
+.tell-your-story__label {
+  font-family: "8BIT WONDER";
+  position: relative;
+  left: 0px;
+  top: 0px;
+  font-size: 18px;
+  transition: all 0.3s;
+}
+
+.tell-your-story__input {
+  border: 1px solid white;
+  width: 450px;
+  position: relative;
+  left: 0px;
+  top: 0px;
+  transition: all 0.5s;
+}
+
+.wall__form_active .tell-your-story__label {
+  transition: all 0.9s;
+}
+.wall__form_active .tell-your-story__input {
+  transition: all 0.5s;
+}
+
+/** ----------post-------- **/
+
+.post {
+  background: black;
+  padding: 1.2em 1.8em;
+  color: white;
+  margin-bottom: 38px;
+  font-size: 20px;
+  line-height: 23px;
+}
+
+.brick-bordered {
+  border: 10px solid white;
+  border-image: url("../src/brick-border.png");
+  border-image-slice: 20;
+  border-image-repeat: round;
+}
+
+.brick-bordered {
+  border: 10px solid white;
+  border-image: url("../src/brick-border.png");
+  border-image-slice: 20;
+  border-image-repeat: round;
+}
+
+.brick-bordered:hover {
+  border: 10px solid white;
+}
+
+.post__header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.post__info {
+  flex-basis: 100%;
+}
+
+.controls {
+  font-family: "8BIT WONDER";
+  font-size: 18px;
+  display: none;
+}
+
+.controls__button {
+  margin-right: 1.6em;
+  text-decoration: none;
+}
+
+.controls__button:visited {
+  color: white;
+}
+
+.controls__button:hover {
+  cursor: pointer;
+}
+
+.post:hover .controls {
+  display: block;
+}
+
+.post__avatar-container {
+  width: 95px;
+  height: 95px;
+  position: relative;
+  z-index: 1;
+  float: left;
+  margin-right: 1.2em;
+  margin-bottom: 0.9em;
+}
+
+.post__author-name {
+  font-family: "8BIT WONDER";
+  margin-bottom: 0.7em;
+  margin-top: 0;
+}
+
+.post__created-at {
+  margin-top: 0.7em;
+}
+
+.post__avatar-border {
+  background: url("../src/post-avatar-border.png");
+  width: 95px;
+  height: 95px;
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.post__avatar {
+  width: 95px;
+  height: 95px;
+  position: absolute;
+  object-fit: fill;
+  z-index: -1;
+}
+
+.post__footer {
+  padding-top: 1.3em;
+  text-align: right;
+}
+
+.post__icon {
+  width: 26px;
+  height: 26px;
+  padding-right: 3em;
+}
+
 @media screen and (max-width: 1224px) {
   .container {
-    padding: 0 8em;
+    padding: 0 3vw;
   }
   .sceptic-guy {
     width: 35vw;

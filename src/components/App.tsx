@@ -15,6 +15,7 @@ import StartScreen from "./StartScreen";
 function App() {
   return (
     <>
+      <Header></Header>
       <Router>
         <AuthProvider>
           <Switch>

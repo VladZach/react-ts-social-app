@@ -93,6 +93,7 @@ export default function Login() {
       form={form}
       submissionError={submissionError}
       errors={errors}
+      gif="guy.gif"
     ></WelcomePage>
   );
 }

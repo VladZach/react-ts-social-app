@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field } from "formik";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom";
@@ -14,6 +14,7 @@ export default function SignUp() {
   const { signup } = useAuth();
 
   const [submissionError, setSubmissionError] = useState("");
+  const [gif, setGif] = useState("guy.gif");
   const [errors, setErrors] = useState<Array<string>>([]);
   const history = useHistory();
   function validate(values: cardLGFormValues) {
@@ -35,6 +36,10 @@ export default function SignUp() {
     }
     //Так как сообщения об ошибке находятся вне формы, храним их в состоянии и передаём пропсом
     setErrors(errors);
+    if (errors.length) {
+      setGif("rejecting-guy.gif");
+      setTimeout(() => setGif("guy.gif"), 1250);
+    }
     return errors;
   }
 
@@ -101,6 +106,7 @@ export default function SignUp() {
 
   return (
     <WelcomePage
+      gif={gif}
       form={form}
       submissionError={submissionError}
       errors={errors}

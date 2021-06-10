@@ -5,9 +5,15 @@ interface Props {
   form: ReactChild;
   submissionError: string;
   errors: Array<string>;
+  gif: string;
 }
 
-export default function WelcomePage({ form, submissionError, errors }: Props) {
+export default function WelcomePage({
+  form,
+  submissionError,
+  errors,
+  gif,
+}: Props) {
   return (
     <div className="page page_welcome-page page_centralized container">
       <div className="welcome-page-header">
@@ -29,7 +35,7 @@ export default function WelcomePage({ form, submissionError, errors }: Props) {
           <div className="thought-bubble__decoration-black"></div>
           <div className="thought-bubble__decoration-white"></div>
         </div>
-        <img className="sceptic-guy__image" src="./guy.gif" />
+        <img className="sceptic-guy__image" src={`./${gif}`} />
       </div>
       <div className="card">
         <h2 className="card__item card__header">Sign Up</h2>
