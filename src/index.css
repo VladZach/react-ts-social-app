@@ -16,22 +16,45 @@
   src: local("PerfectDos"), url(./fonts/PerfectDos.ttf) format("truetype");
 }
 
+/* ------- global variables ---------*/
+
+:root {
+  --inactive-item-color: rgb(192, 192, 192);
+  --active-item-color: white;
+}
+
 /* ------- general ------- */
+
+* {
+  box-sizing: content-box;
+}
 
 body {
   margin: 0;
   font-family: "PerfectDos";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  box-sizing: border-box;
+}
+
+textarea {
+  resize: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:visited {
+  color: inherit;
 }
 
 .page {
   background: url(bg.png);
+  background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  min-height: 100vh;
+  min-height: 92.1vh;
 }
 
 .page_welcome-page {
@@ -53,7 +76,14 @@ body {
   align-items: center;
   position: sticky;
   top: 0;
+  justify-content: space-between;
   z-index: 100;
+}
+
+.header__icon {
+  width: 30px;
+  height: 30px;
+  margin-right: 2em;
 }
 
 .header_logo {
@@ -71,6 +101,40 @@ body {
 .container {
   padding-left: 12vw;
   padding-right: 12vw;
+}
+
+.bordered-container {
+  padding: 1.3em 0.9em;
+  border: 18px solid black;
+}
+.glassed-container {
+  position: relative;
+  z-index: 1;
+}
+.glassed-container::after {
+  content: "";
+  background: url("../src/background-noise.png");
+  background-size: 50px;
+  opacity: 0.4;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+.section-header {
+  margin-bottom: 40px;
+  padding: 0.8em 1.7em;
+  background: black;
+  font-family: "8BIT WONDER";
+  font-size: 20px;
+  color: white;
+}
+
+.input_white-border {
+  border: 1px solid white;
 }
 
 /* ------- welcome-page -------- */
@@ -207,6 +271,10 @@ body {
   color: white;
 }
 
+.card__input {
+  border: 0;
+}
+
 /* ------- form -------- */
 
 .form__item {
@@ -229,7 +297,11 @@ body {
   font-family: "PerfectDos";
   font-size: 1.5vw;
   background-color: #000000;
-  border-width: 0;
+}
+
+.edit-input {
+  display: inline-block;
+  width: 100%;
 }
 
 .form__input:focus {
@@ -281,7 +353,6 @@ body {
 
 .sceptic-guy {
   width: 50vh;
-  margin-top: -35px;
 }
 
 .sceptic-guy__thought-bubble {
@@ -289,6 +360,7 @@ body {
   position: absolute;
   right: 150px;
   width: auto;
+  text-align: center;
   float: right;
   margin-bottom: 20px;
 }
@@ -311,8 +383,6 @@ body {
   border: solid black 10px;
   padding: 0.5em 1em;
   width: auto;
-  text-align: center;
-  border-radius: 40px 40px 0 40px;
   background: white;
 }
 .thought-bubble__text {
@@ -322,14 +392,11 @@ body {
 
 .thought-bubble__decoration-black {
   position: absolute;
-  bottom: -19px;
-  right: 0;
   box-sizing: border-box;
   border: solid black;
   height: 0;
   width: 0;
-  border-width: 20px 20px;
-  border-radius: 0px 0px 20px 20px;
+
   z-index: -1;
 }
 
@@ -339,11 +406,6 @@ body {
   position: absolute;
   width: 20px;
   height: 20px;
-  top: -20px;
-  right: -2px;
-  border-right: 17px solid black;
-  border-top: 17px solid black;
-  border-radius: 0 100px 0 100px;
 }
 
 .thought-bubble__decoration-white {
@@ -352,10 +414,7 @@ body {
   border: solid white;
   height: 0;
   width: 0;
-  bottom: -9px;
-  right: 10px;
-  border-width: 18px 11px;
-  border-radius: 0px 0px 25px 25px;
+
   z-index: 1;
   transform: rotate(-2deg);
 }
@@ -366,11 +425,78 @@ body {
   position: absolute;
   width: 20px;
   height: 18px;
+}
+
+/** left message **/
+
+.thought-bubble-left__decoration-black {
+  top: -19px;
+  left: 0;
+  border-width: 20px 20px;
+  border-radius: 20px 20px 0px 0px;
+}
+
+.thought-bubble-left__decoration-black::after {
+  bottom: -20px;
+  left: -2px;
+  border-left: 17px solid black;
+  border-bottom: 17px solid black;
+  border-radius: 0 100px 0 100px;
+}
+
+.thought-bubble-left__decoration-white {
+  top: -9px;
+  left: 10px;
+  border-width: 18px 11px;
+  border-radius: 25px 25px 0px 0px;
+}
+
+.thought-bubble-left__decoration-white:after {
+  bottom: -20px;
+  left: -2.5px;
+  border-left: 12px solid white;
+  border-bottom: 17px solid white;
+  border-radius: 0 100px 0 100px;
+}
+
+.thought-bubble__body-left {
+  border-radius: 0px 40px 40px 40px;
+}
+
+/** right message **/
+
+.thought-bubble-right__decoration-black {
+  bottom: -19px;
+  right: 0;
+  border-width: 20px 20px;
+  border-radius: 0px 0px 20px 20px;
+}
+
+.thought-bubble-right__decoration-black::after {
+  top: -20px;
+  right: -2px;
+  border-radius: 0 100px 0 100px;
+  border-right: 17px solid black;
+  border-top: 17px solid black;
+}
+
+.thought-bubble-right__decoration-white {
+  bottom: -9px;
+  right: 10px;
+  border-radius: 0px 0px 25px 25px;
+  border-width: 18px 11px;
+}
+
+.thought-bubble-right__decoration-white::after {
   top: -20px;
   right: -2.5px;
+  border-radius: 0 100px 0 100px;
   border-right: 12px solid white;
   border-top: 17px solid white;
-  border-radius: 0 100px 0 100px;
+}
+
+.thought-bubble__body-right {
+  border-radius: 40px 40px 0 40px;
 }
 
 /** ---------- user-profile ----------- **/
@@ -379,10 +505,9 @@ body {
   border: 16px solid black;
   display: flex;
   padding: 1em 1.2em;
-  position: relative;
-  z-index: 1;
   margin-bottom: 2em;
   margin-top: 2.5em;
+  width: 100%;
 }
 
 .user-info__header {
@@ -398,22 +523,10 @@ body {
   display: block;
 }
 
-.user-profile::after {
-  content: "";
-  background: url("../src/background-noise.png");
-  background-size: 50px;
-  opacity: 0.4;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  position: absolute;
-  z-index: -1;
-}
-
 .user-profile__avatar {
   width: 225px;
   height: 225px;
+  object-fit: cover;
 }
 
 .stone-bordered {
@@ -430,6 +543,7 @@ body {
 .user-profile__info {
   margin-left: 1em;
   padding: 1.2em;
+  flex-basis: 100%;
 }
 
 .user-name {
@@ -456,13 +570,171 @@ body {
   padding-left: 1em;
 }
 
+/** ------people-search--------- **/
+
+.search {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2em;
+  margin-top: 2.5em;
+  width: 100%;
+}
+
+.search__link {
+  width: 100%;
+}
+
+/* переделать на БЭМ */
+
+.search .user-profile {
+  padding: 1em 0.9em;
+  margin: 0 0 0 -1.8em;
+  border-bottom: 0;
+}
+
+.people-search__header {
+  display: flex;
+  justify-content: space-between;
+}
+
+/** --------chat---------- **/
+
+.chat {
+  padding: 1.5em;
+  box-sizing: border-box;
+  width: 100%;
+  display: grid;
+  grid-template:
+    "header header header"
+    ". chat chat"
+    "footer footer footer";
+  grid-template-rows: 90px 1fr 100px;
+  grid-template-columns: 95px 1fr 95px;
+  height: 85vh;
+}
+
+.chat__header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  position: relative;
+  grid-area: header;
+}
+
+.interlocutor__name {
+  font-family: "8BIT WONDER";
+  color: white;
+  font-size: 30px;
+  position: absolute;
+  width: 100%;
+  padding-bottom: 1em;
+  text-align: center;
+}
+
+.chat__avatar {
+  width: 90px;
+  height: 90px;
+}
+
+.chat__interlocutor-avatar {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.chat__footer {
+  padding-top: 1.5em;
+  display: flex;
+  align-items: center;
+  grid-area: footer;
+}
+
+.chat__input {
+  flex-basis: calc(100% - 122px);
+  height: 89px;
+  margin-right: 23px;
+}
+
+.chat__controls {
+  position: absolute;
+  right: 0;
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 25px;
+  overflow-y: scroll;
+  padding-top: 20px;
+  grid-area: chat;
+  padding-right: 90px;
+}
+
+.messages::-webkit-scrollbar {
+  width: 0.5em;
+  position: absolute;
+  left: 500px;
+}
+
+.messages::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.messages::-webkit-scrollbar-thumb {
+  background-color: black;
+  outline: 1px solid white;
+}
+
+.message_round {
+  border-radius: 40px;
+}
+
+.thought-bubble__message {
+  margin-bottom: 0.5em;
+  flex-basis: 0;
+  display: inline-block;
+  max-width: 40vw;
+}
+
+.thought-bubble__message:hover {
+  cursor: pointer;
+}
+
+.thought-bubble__message:active {
+  transform: scale(0.98);
+}
+
+.message_from-me {
+  align-self: flex-end;
+}
+
+.message_from-interlocutor {
+  align-self: flex-start;
+}
+
+/** -------chats-------- **/
+
+.chats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2em;
+  margin-top: 2.5em;
+  width: 100%;
+}
+
+.chats__header {
+  width: 20%;
+  text-align: center;
+}
+
 /** -------wall--------- **/
 
 .wall {
-  padding: 1.3em 0.9em;
-  border: 18px solid black;
   background: url("../src/wall-background.png");
   background-size: 102px;
+  width: 100%;
 }
 
 .wall__form {
@@ -475,7 +747,11 @@ body {
   position: relative;
   height: 46px;
   justify-content: space-between;
-  transition: all 0.5s;
+  transition: all 0.6s;
+}
+
+.wall__form_active {
+  transition: all 0.3s;
 }
 
 .tell-your-story__label {
@@ -488,19 +764,59 @@ body {
 }
 
 .tell-your-story__input {
-  border: 1px solid white;
   width: 450px;
   position: relative;
   left: 0px;
   top: 0px;
-  transition: all 0.5s;
+  height: 1em;
+  transition: all 0.6s;
+}
+
+textarea::-webkit-scrollbar {
+  width: 0.3em;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background-color: white;
+}
+
+.tell-your-story__submit-button {
+  display: none;
+}
+
+.tell-your-story__submit-button_visible {
+  display: block;
+  position: absolute;
+  right: 0;
+  bottom: 20px;
 }
 
 .wall__form_active .tell-your-story__label {
-  transition: all 0.9s;
+  transition: all 1s;
 }
 .wall__form_active .tell-your-story__input {
-  transition: all 0.5s;
+  transition: all 0.3s;
+}
+
+.clear-icon {
+  fill: var(--inactive-item-color);
+  width: 15px;
+  height: 15px;
+}
+
+.tell-your-story__clear-icon {
+  display: none;
+}
+
+.tell-your-story__clear-icon_visible {
+  display: block;
+  position: absolute;
+  right: 34.8px;
+}
+
+.tell-your-story__clear-icon_visible:hover {
+  fill: var(--active-item-color);
+  cursor: pointer;
 }
 
 /** ----------post-------- **/
@@ -511,7 +827,6 @@ body {
   color: white;
   margin-bottom: 38px;
   font-size: 20px;
-  line-height: 23px;
 }
 
 .brick-bordered {
@@ -538,40 +853,50 @@ body {
 }
 
 .post__info {
-  flex-basis: 100%;
+  flex-basis: 60%;
 }
 
 .controls {
   font-family: "8BIT WONDER";
   font-size: 18px;
+}
+
+.post__controls {
   display: none;
+}
+
+.post-deletion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.post-deletion__controls {
+  display: block;
+}
+
+.post-deletion__header {
+  font-family: "8BIT WONDER";
+  padding-bottom: 1em;
 }
 
 .controls__button {
   margin-right: 1.6em;
   text-decoration: none;
+  color: var(--inactive-item-color);
 }
 
 .controls__button:visited {
-  color: white;
+  color: var(--inactive-item-color);
 }
 
 .controls__button:hover {
   cursor: pointer;
+  color: var(--active-item-color);
 }
 
 .post:hover .controls {
   display: block;
-}
-
-.post__avatar-container {
-  width: 95px;
-  height: 95px;
-  position: relative;
-  z-index: 1;
-  float: left;
-  margin-right: 1.2em;
-  margin-bottom: 0.9em;
 }
 
 .post__author-name {
@@ -584,32 +909,188 @@ body {
   margin-top: 0.7em;
 }
 
-.post__avatar-border {
+.avatar-container {
+  z-index: 1;
+  float: left;
+}
+
+.avatar {
+  object-fit: cover;
+  z-index: -1;
+}
+
+.avatar-border {
   background: url("../src/post-avatar-border.png");
-  width: 95px;
-  height: 95px;
   position: absolute;
   background-repeat: no-repeat;
   background-size: contain;
 }
 
+.post__avatar-container {
+  width: 95px;
+  height: 95px;
+  margin-right: 1.2em;
+  margin-bottom: 0.9em;
+}
+
+.post__avatar-border {
+  width: 95px;
+  height: 95px;
+}
+
 .post__avatar {
   width: 95px;
   height: 95px;
-  position: absolute;
-  object-fit: fill;
-  z-index: -1;
+}
+
+.post__text {
+  white-space: pre-line;
+  border: 2px solid black;
+  display: block;
 }
 
 .post__footer {
   padding-top: 1.3em;
   text-align: right;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.post__icon-container {
+  margin-right: 2em;
 }
 
 .post__icon {
   width: 26px;
   height: 26px;
-  padding-right: 3em;
+}
+
+.post__submit-button {
+  border: 0;
+  font-family: "8BIT WONDER";
+  background: none;
+  font-size: 1.1vw;
+  font-size: 18px;
+  text-decoration: none;
+  outline: none;
+}
+
+/** ---------comments ---------**/
+
+.comments {
+  padding: 0 2em;
+  text-align: left;
+}
+
+.post__comment {
+  margin-bottom: 1.5em;
+}
+
+.post__comment:last-of-type {
+  margin-bottom: 0;
+}
+
+.post__comment-form {
+  margin-top: 1.5em;
+}
+
+.comment__avatar-container {
+  width: 60px;
+  height: 60px;
+  margin-right: 0.7em;
+}
+
+.comment__info {
+  flex-basis: 60%;
+}
+
+.comment__header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.comment__avatar-border {
+  width: 60px;
+  height: 60px;
+}
+
+.comment__avatar {
+  width: 60px;
+  height: 60px;
+}
+
+.comment-form {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.comment__controls {
+  align-self: center;
+}
+
+.comment__author-name {
+  font-family: "8BIT WONDER";
+  font-size: 0.8em;
+  margin-top: 0;
+}
+
+.comment__created-at {
+  font-size: 0.9em;
+}
+
+.comment__submit-button:first-of-type {
+  margin-left: 1em;
+}
+/** --------icon----------- **/
+
+.icon__outer-group use {
+  fill: var(--inactive-item-color);
+}
+.icon__inner-group use {
+  fill: transparent;
+}
+
+.icon:hover {
+  cursor: pointer;
+}
+
+.icon:active {
+  transform: scale(0.9);
+}
+
+.like-icon:hover .icon__inner-group use {
+  fill: rgba(255, 0, 0, 0.603);
+}
+
+.icon:hover .icon__outer-group use {
+  fill: var(--active-item-color);
+}
+
+.like-icon_liked .icon__inner-group use {
+  fill: red;
+}
+
+.like-icon_liked:hover .icon__inner-group use {
+  fill: red;
+}
+
+/** ---------loader ------------ **/
+
+.loader {
+  background-color: #000000;
+  box-shadow: 0px 4px 4px 4px rgb(0 0 0 / 25%);
+  padding: 0.7em 1em;
+  width: 197px;
+  text-align: left;
+  color: white;
+  font-size: 1.5em;
+  border: 8px solid white;
+}
+
+.loader__word {
+  font-family: "8BIT WONDER";
 }
 
 @media screen and (max-width: 1224px) {

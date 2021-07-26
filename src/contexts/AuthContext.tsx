@@ -1,4 +1,4 @@
-import firebase from "firebase";
+import firebase from "firebase/compat/app";
 import React, { useContext, useState, useEffect, ReactChild } from "react";
 import { auth } from "../firebase";
 
@@ -22,6 +22,9 @@ export interface AuthContextValue {
     email: string,
     password: string
   ) => Promise<firebase.auth.UserCredential>;
+  reauthenticate: (
+    password: string
+  ) => Promise<firebase.auth.UserCredential> | null;
   logout: () => Promise<void>;
   updatePassword: (password: string) => Promise<void>;
   updateEmail: (email: string) => Promise<void>;
@@ -40,6 +43,19 @@ export function AuthProvider({ children }: Props) {
   //(ну и интерфейс, да)
   function login(email: string, password: string) {
     return auth.signInWithEmailAndPassword(email, password);
+  }
+
+  function reauthenticate(password: string) {
+    const user = firebase.auth().currentUser;
+    if (user !== null) {
+      const credential = firebase.auth.EmailAuthProvider.credential(
+        user.email!,
+        password
+      );
+      // Now you can use that to reauthenticate
+      return user.reauthenticateWithCredential(credential);
+    }
+    return null;
   }
 
   function logout() {
@@ -77,6 +93,7 @@ export function AuthProvider({ children }: Props) {
     updatePassword,
     updateEmail,
     resetPassword,
+    reauthenticate,
   };
   return (
     <AuthContext.Provider value={value}>

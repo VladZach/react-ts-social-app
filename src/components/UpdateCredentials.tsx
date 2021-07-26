@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Link, useHistory } from "react-router-dom";
 import { cardLGFormValues } from "./SignUp";
 
-export default function UpdateCre() {
+export default function UpdateCredentials() {
   const { updateEmail, updatePassword, currentUser } = useAuth();
 
   const history = useHistory();
@@ -31,7 +31,11 @@ export default function UpdateCre() {
     <Formik
       initialValues={{
         //благодаря состоянию loading в authContext, currentUser не может быть равен null
-        email: currentUser!.email as string,
+        email: currentUser!.email!,
+        firstName: "",
+        lastName: "",
+        aboutMe: "",
+        whereFrom: "",
         password: "",
         passwordConfirmation: "",
       }}
@@ -58,6 +62,17 @@ export default function UpdateCre() {
               className="form__input form__input_textual-sm"
               type="email"
               name="email"
+            />
+            <ErrorMessage name="email" component="div" />
+          </div>
+          <div className="form__item">
+            <label className="form__label" htmlFor="firstName">
+              Firstname
+            </label>
+            <Field
+              className="form__input form__input_textual-sm"
+              type="text"
+              name="firstName"
             />
             <ErrorMessage name="email" component="div" />
           </div>

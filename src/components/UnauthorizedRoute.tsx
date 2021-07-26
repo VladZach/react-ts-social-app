@@ -12,6 +12,7 @@ export default function UnathorizedRoute({
     <Route
       {...rest}
       render={(props) => {
+        console.log(props);
         return currentUser ? (
           <Redirect to="/"></Redirect>
         ) : (

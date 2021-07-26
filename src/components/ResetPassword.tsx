@@ -1,31 +1,42 @@
-import React, { useState } from "react";
+import React from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
-import WelcomePage from "./WelcomePage";
+import { ScepticGuyPageProps } from "./ScepticGuyPage";
 
 export interface cardSMFormValues {
-  email?: string;
+  email?: string | null;
 }
 
-export default function SignUp() {
+export default function SignUp({
+  setSubmissionError,
+  setErrors,
+  setGif,
+}: ScepticGuyPageProps) {
   const { resetPassword } = useAuth();
-  const [submissionError, setSubmissionError] = useState("");
-  const [errors, setErrors] = useState<Array<string>>([]);
+
   function validate(values: cardSMFormValues) {
-    setErrors([]);
+    const errors: Array<string> = [];
     if (!values.email) {
-      setErrors((errors) => [...errors, "Email is required"]);
+      errors.push("Email is required");
     } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      setErrors((errors) => [...errors, "Invalid email address"]);
+      errors.push("Invalid email address");
+    }
+    //Так как сообщения об ошибке находятся вне формы, храним их в состоянии и передаём пропсом
+    setErrors(errors);
+    if (errors.length) {
+      setGif("rejecting-guy.gif");
+      setTimeout(() => setGif("guy.gif"), 1250);
     }
     return errors;
   }
 
-  const form = (
+  return (
     <Formik
       initialValues={{ email: "" }}
       validate={validate}
+      validateOnBlur={false}
+      validateOnChange={false}
       onSubmit={async function (values) {
         try {
           await resetPassword(values.email);
@@ -34,16 +45,17 @@ export default function SignUp() {
         }
       }}
     >
-      {({ isSubmitting }) => (
-        <Form className="card__form card__item form">
+      {() => (
+        <Form noValidate className="card__form card__item form">
           <div className="form__item">
             <label className="form__label" htmlFor="email">
               Email
             </label>
             <Field
-              className="form__input form__input_textual-sm"
+              className="form__input card__input form__input_textual-sm"
               type="email"
               name="email"
+              autoComplete="off"
             />
             <ErrorMessage
               name="email"
@@ -62,14 +74,5 @@ export default function SignUp() {
         </Form>
       )}
     </Formik>
-  );
-
-  return (
-    <WelcomePage
-      form={form}
-      submissionError={submissionError}
-      errors={errors}
-      gif="guy.gif"
-    ></WelcomePage>
   );
 }

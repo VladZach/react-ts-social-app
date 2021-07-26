@@ -1,71 +1,68 @@
-import React, { DOMElement, FormEvent, useState } from "react";
-import { isTemplateExpression } from "typescript";
-import Post from "./Post";
+import React, { useState, useEffect, useRef } from "react";
+import Post, { PostProps } from "./Post";
+import TellYourStory from "./TellYourStory";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  off,
+  get,
+  DataSnapshot,
+} from "firebase/database";
+import { UserDataWithId } from "./UserProfile";
 
-export default function Wall() {
-  const [isTelling, setIsTelling] = useState(false);
+export default function Wall({ fullName, photoUrl, userId }: UserDataWithId) {
+  const { currentUser } = useAuth();
 
-  function activateInput() {
-    setIsTelling(true);
+  const isMine = currentUser!.uid === userId;
+
+  const [posts, setPosts] = useState<PostProps[]>([]);
+
+  function getPosts() {
+    const db = getDatabase();
+    const postsRef = ref(db, "users/" + userId + "/posts/");
+    onValue(postsRef, (snapshot) => {
+      let posts: PostProps[] = [];
+      const promises: Promise<void | DataSnapshot>[] = [];
+      snapshot.forEach((childSnapshot) => {
+        const postRef = ref(db, "posts/" + childSnapshot.key);
+        promises.push(
+          get(postRef).then((snapshot) => {
+            const data = snapshot.val();
+            data.postId = snapshot.key;
+            posts.push(data);
+          })
+        );
+      });
+      //firebase не поддерживает сортировку по убыванию
+      Promise.all(promises).then(() => setPosts(posts.reverse()));
+    });
   }
 
-  function disableInput() {
-    setIsTelling(false);
-  }
-  function centerElement(event: FormEvent<HTMLTextAreaElement>) {
-    const textarea = event.target as HTMLTextAreaElement;
-    const container = textarea.parentElement as HTMLDivElement;
-    const containerWidth = container.offsetWidth;
-    const destination = containerWidth! / 2 - textarea.offsetWidth / 2;
-    const header = container.querySelector(
-      ".tell-your-story__label"
-    ) as HTMLSpanElement;
-    const destination2 = containerWidth! / 2 - header.offsetWidth / 2;
-
-    const left = textarea.offsetLeft - destination;
-    const left2 = header.offsetLeft - destination2;
-
-    container.style.paddingBottom = 75 + "px";
-    container.style.border = "10px solid white";
-    textarea.style.left = -left + "px";
-    textarea.style.top = 50 + "px";
-    header.style.left = -left2 + "px";
-    setIsTelling(true);
-  }
-
-  function uncenterElement(event: FormEvent<HTMLTextAreaElement>) {
-    const textarea = event.target as HTMLTextAreaElement;
-    const container = textarea.parentElement as HTMLDivElement;
-    const header = container.querySelector(
-      ".tell-your-story__label"
-    ) as HTMLSpanElement;
-    textarea.style.left = "";
-    textarea.style.top = "";
-    container.style.paddingBottom = "";
-    header.style.left = "";
-    container.style.border = "";
-    setIsTelling(false);
-  }
+  useEffect(() => {
+    getPosts();
+    return () => {
+      const db = getDatabase();
+      off(ref(db, "users/" + userId + "/posts/"));
+    };
+  }, []);
 
   return (
-    <div className="wall">
-      <div
-        className={
-          (isTelling ? "wall__form_active " : "") +
-          "wall__form tell-your-story brick-bordered "
-        }
-      >
-        <span className="tell-your-story__label">tell your story</span>
-        <textarea
-          onBlur={uncenterElement}
-          onFocus={centerElement}
-          id="tell-your-story"
-          className="form__input tell-your-story__input"
-        ></textarea>
-      </div>
-      <Post></Post>
-      <Post></Post>
-      <Post></Post>
+    <div className="wall bordered-container">
+      {isMine ? <TellYourStory></TellYourStory> : null}
+
+      {posts?.map((item, index) => (
+        <Post
+          userName={fullName}
+          text={item.text}
+          createdAt={item.createdAt}
+          postId={item.postId}
+          key={item.createdAt}
+          photoUrl={photoUrl}
+          authorId={item.authorId}
+        ></Post>
+      ))}
     </div>
   );
 }

@@ -1,22 +1,25 @@
-import React, { useState } from "react";
+import React from "react";
 import { Formik, Form, Field } from "formik";
 import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import { cardMDFormValues } from "./Login";
-import WelcomePage from "./WelcomePage";
+import { getDatabase, ref, set } from "firebase/database";
+import { ScepticGuyPageProps } from "./ScepticGuyPage";
 
 export interface cardLGFormValues extends cardMDFormValues {
   passwordConfirmation?: string;
 }
 
-export default function SignUp() {
-  const { signup } = useAuth();
+export default function SignUp({
+  setGif,
+  setSubmissionError,
+  setErrors,
+}: ScepticGuyPageProps) {
+  const { signup, currentUser } = useAuth();
 
-  const [submissionError, setSubmissionError] = useState("");
-  const [gif, setGif] = useState("guy.gif");
-  const [errors, setErrors] = useState<Array<string>>([]);
   const history = useHistory();
+
   function validate(values: cardLGFormValues) {
     const errors: Array<string> = [];
     if (!values.email) {
@@ -43,73 +46,75 @@ export default function SignUp() {
     return errors;
   }
 
-  const form = (
-    <Formik
-      initialValues={{ email: "", password: "", passwordConfirmation: "" }}
-      validateOnBlur={false}
-      validateOnChange={false}
-      validate={validate}
-      onSubmit={async function (values) {
-        try {
-          await signup(values.email, values.password);
-          history.push("/");
-        } catch (e) {
-          setSubmissionError(e.message);
-        }
-      }}
-    >
-      {({ isSubmitting }) => (
-        <Form noValidate className="card__form card__item form">
-          <div className="form__item">
-            <label className="form__label" htmlFor="email">
-              email:
-            </label>
-            <Field
-              className="form__input form__input_textual-sm"
-              type="email"
-              name="email"
-              autoComplete="off"
-            />
-          </div>
-          <div className="form__item">
-            <label className="form__label" htmlFor="password">
-              password:
-            </label>
-            <Field
-              className="form__input form__input_textual-sm"
-              type="password"
-              name="password"
-            />
-          </div>
-          <div className="form__item">
-            <label className="form__label" htmlFor="password">
-              password again:
-            </label>
-            <Field
-              className="form__input form__input_textual-sm"
-              type="password"
-              name="passwordConfirmation"
-            />
-          </div>
-          <div className="form__footer">
-            <Link className="button form__submit-button" to="/start-screen">
-              back
-            </Link>
-            <button className="button form__submit-button" type="submit">
-              enter
-            </button>
-          </div>
-        </Form>
-      )}
-    </Formik>
-  );
-
   return (
-    <WelcomePage
-      gif={gif}
-      form={form}
-      submissionError={submissionError}
-      errors={errors}
-    ></WelcomePage>
+    <>
+      <Formik
+        initialValues={{ email: "", password: "", passwordConfirmation: "" }}
+        validateOnBlur={false}
+        validateOnChange={false}
+        validate={validate}
+        onSubmit={async function (values) {
+          try {
+            const { user } = await signup(values.email, values.password);
+            const db = getDatabase();
+            const userRef = ref(db, "users/" + user!.uid);
+            const userObj = {
+              fullName: "",
+              photoUrl: "",
+              aboutMe: "",
+              whereFrom: "",
+            };
+            await set(userRef, userObj);
+            history.push("/update-profile");
+          } catch (e) {
+            setSubmissionError(e.message);
+          }
+        }}
+      >
+        {() => (
+          <Form noValidate className="card__form card__item form">
+            <div className="form__item">
+              <label className="form__label" htmlFor="email">
+                email:
+              </label>
+              <Field
+                className="form__input card__input form__input_textual-sm"
+                type="email"
+                name="email"
+                autoComplete="off"
+              />
+            </div>
+            <div className="form__item">
+              <label className="form__label" htmlFor="password">
+                Password:
+              </label>
+              <Field
+                className="form__input card__input form__input_textual-sm"
+                type="password"
+                name="password"
+              />
+            </div>
+            <div className="form__item">
+              <label className="form__label" htmlFor="password">
+                Password again:
+              </label>
+              <Field
+                className="form__input card__input form__input_textual-sm"
+                type="password"
+                name="passwordConfirmation"
+              />
+            </div>
+            <div className="form__footer">
+              <Link className="button form__submit-button" to="/start-screen">
+                back
+              </Link>
+              <button className="button form__submit-button" type="submit">
+                enter
+              </button>
+            </div>
+          </Form>
+        )}
+      </Formik>
+    </>
   );
 }

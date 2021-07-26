@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactChild } from "react";
 import { AuthProvider } from "../contexts/AuthContext";
 import SignUp from "./SignUp";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
@@ -10,39 +10,128 @@ import ResetPassword from "./ResetPassword";
 import UnathorizedRoute from "./UnauthorizedRoute";
 import UpdateCredentials from "./UpdateCredentials";
 import Header from "./Header";
+import Chats from "./Chats";
 import StartScreen from "./StartScreen";
+import SearchPeople from "./SearchPeople";
+import Chat from "./Chat";
+import ScepticGuyPage from "./ScepticGuyPage";
+import Reauthenticate from "./Reauthenticate";
+import News from "./News";
 
 function App() {
+  const signUp = () => {
+    return (
+      <ScepticGuyPage
+        child={SignUp}
+        heading="Sign up"
+        hasHeader={true}
+      ></ScepticGuyPage>
+    );
+  };
+
+  const login = () => {
+    return (
+      <ScepticGuyPage
+        child={Login}
+        heading="Log in"
+        hasHeader={true}
+      ></ScepticGuyPage>
+    );
+  };
+
+  const resetPassword = () => {
+    return (
+      <ScepticGuyPage
+        child={ResetPassword}
+        heading="Reset password"
+        hasHeader={true}
+      ></ScepticGuyPage>
+    );
+  };
+
+  const startScreen = () => {
+    return (
+      <ScepticGuyPage
+        child={StartScreen}
+        heading="Choose your path"
+        hasHeader={true}
+      ></ScepticGuyPage>
+    );
+  };
+
+  const updateProfile = () => {
+    return (
+      <ScepticGuyPage
+        child={UpdateProfile}
+        heading="Update profile"
+        hasHeader={false}
+      ></ScepticGuyPage>
+    );
+  };
+
+  const reauthenticate = () => {
+    return (
+      <ScepticGuyPage
+        child={Reauthenticate}
+        heading="reathenticate"
+        hasHeader={false}
+      ></ScepticGuyPage>
+    );
+  };
+
   return (
     <>
-      <Header></Header>
       <Router>
+        <Header></Header>
         <AuthProvider>
           <Switch>
-            <PrivateRoute exact path="/" component={UserPage}></PrivateRoute>
+            <PrivateRoute
+              exact
+              path="/"
+              key="current-user"
+              component={UserPage}
+            ></PrivateRoute>
+
             <UnathorizedRoute
               path="/start-screen"
-              component={StartScreen}
+              component={startScreen}
             ></UnathorizedRoute>
             <UnathorizedRoute
               path="/signup"
-              component={SignUp}
+              component={signUp}
             ></UnathorizedRoute>
             <UnathorizedRoute
               path="/login"
-              component={Login}
+              component={login}
             ></UnathorizedRoute>
             <PrivateRoute
               path="/update-credentials"
               component={UpdateCredentials}
             ></PrivateRoute>
+            <PrivateRoute
+              path="/reauthenticate"
+              component={reauthenticate}
+            ></PrivateRoute>
             <UnathorizedRoute
               path="/reset-password"
-              component={ResetPassword}
+              component={resetPassword}
             ></UnathorizedRoute>
             <PrivateRoute
               path="/update-profile"
-              component={UpdateProfile}
+              component={updateProfile}
+            ></PrivateRoute>
+            <PrivateRoute path="/news" component={News}></PrivateRoute>
+            <PrivateRoute path="/chats" component={Chats}></PrivateRoute>
+            <PrivateRoute
+              path="/search-people"
+              component={SearchPeople}
+            ></PrivateRoute>
+
+            <PrivateRoute path="/chat/:userId" component={Chat}></PrivateRoute>
+            <PrivateRoute
+              path="/:id"
+              key="other-user"
+              component={UserPage}
             ></PrivateRoute>
           </Switch>
         </AuthProvider>
