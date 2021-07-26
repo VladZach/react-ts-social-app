@@ -63,6 +63,8 @@ export default function Post({
   const [comments, setComments] = useState<CommentProps[]>([]);
   const [likesAmount, setLikesAmount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  //из-за структуры базы данных, приходится следить за обновлениями поста отдельно
+  const [postText, setPostText] = useState("");
 
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -76,6 +78,13 @@ export default function Post({
       if (snapshot.exists()) {
         setIsLiked(true);
       } else setIsLiked(false);
+    });
+  }
+
+  function watchPostText() {
+    const postTextRef = ref(db, "posts/" + postId + "/text");
+    onValue(postTextRef, (snapshot) => {
+      setPostText(snapshot.val());
     });
   }
 
@@ -124,6 +133,21 @@ export default function Post({
       off(ref(db, "likes/posts/" + postId));
     };
   }, []);
+
+  useEffect(() => {
+    watchPostText();
+    return () => {
+      off(ref(db, "posts/" + postId + "/text"));
+    };
+  });
+
+  function editPost(text: string) {
+    let trimedText = text.trim();
+    if (trimedText) {
+      const postRef = ref(db, "posts/" + postId);
+      return update(postRef, { text: trimedText });
+    }
+  }
 
   function deletePost(postId: string) {
     const postRef = ref(db, "posts/" + postId);
@@ -186,17 +210,9 @@ export default function Post({
     remove(likeRef);
   }
 
-  function editPost(text: string) {
-    let trimedText = text.trim();
-    if (trimedText) {
-      const postRef = ref(db, "posts/" + postId);
-      return update(postRef, { text: trimedText });
-    }
-  }
-
   const editForm = (
     <Formik
-      initialValues={{ text: text }}
+      initialValues={{ text: postText }}
       onSubmit={async function ({ text }) {
         try {
           await editPost(text);
@@ -306,7 +322,7 @@ export default function Post({
             editForm
           ) : (
             <>
-              <span className="post__text">{text}</span>
+              <span className="post__text">{postText}</span>
               <div className="post__footer">
                 <div className="post__icon-container">
                   <svg
