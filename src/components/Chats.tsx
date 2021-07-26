@@ -1,19 +1,20 @@
-import { getDatabase, off, onValue, ref, get } from "firebase/database";
+import { getDatabase, off, onValue, ref } from "firebase/database";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { MessageProps } from "./Chat";
+import { MessageObject } from "./Chat";
 import LastMessage from "./LastMessage";
 
 export default function Chats() {
-  const [lastMessages, setLastMessages] = useState<MessageProps[]>([]);
+  const [lastMessages, setLastMessages] = useState<MessageObject[]>([]);
 
   const { currentUser } = useAuth();
 
+  const db = getDatabase();
+
   function getLastChats() {
-    const db = getDatabase();
     const chatsRef = ref(db, "chats/" + currentUser!.uid);
     onValue(chatsRef, (snapshot) => {
-      const lastMessages: MessageProps[] = [];
+      const lastMessages: MessageObject[] = [];
       snapshot.forEach((childSnapshot) => {
         lastMessages.push(childSnapshot.val());
       });
@@ -24,7 +25,6 @@ export default function Chats() {
   useEffect(() => {
     getLastChats();
     return () => {
-      const db = getDatabase();
       const chatsRef = ref(db, "chats/" + currentUser!.uid);
       off(chatsRef);
     };

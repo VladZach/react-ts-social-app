@@ -2,13 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Formik, Form, Field } from "formik";
-import Avatar from "./Avatar";
-import Message from "./Message";
-import { computeOffset } from "./TellYourStory";
 import {
   getDatabase,
   ref,
-  get,
   push,
   remove,
   update,
@@ -17,79 +13,81 @@ import {
   onValue,
   off,
 } from "@firebase/database";
+import Avatar from "./Avatar";
+import Message from "./Message";
 import Loader from "./Loader";
 import { UserData } from "./UserProfile";
 import { getUserData } from "./UserProfile";
 
-export interface ChosenMessageProps {
-  messageId: string;
+export interface SelectedMessageProps {
+  id: string;
   text: string;
 }
 
-export interface MessageProps {
+export interface MessageObject {
+  id?: string;
   text: string;
-  createdAt: string;
-  author: string;
-  isLastInRow?: boolean;
-  isFirst?: boolean;
-  interlocutor?: string;
-  messageId?: string;
+  createdAt: string | object;
+  authorId: string;
+  hasScionOnBottom?: boolean;
+  hasScionOnTop?: boolean;
+  interlocutorId?: string;
 }
 
-export function getPathByUsers(currentUserId: string, otherUserId: string) {
-  return currentUserId > otherUserId
-    ? currentUserId + otherUserId
-    : otherUserId + currentUserId;
+export function getRefPathByUsersNames(userId: string, otherUserId: string) {
+  return userId > otherUserId ? userId + otherUserId : otherUserId + userId;
 }
 
 export default function Chat() {
-  function centerAvatar(element: HTMLElement) {}
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [currentUserData, setCurrentUserData] = useState<UserData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [chosenMessage, setChosenMessage] = useState<ChosenMessageProps | null>(
+  const [interlocutorData, setInterlocutorData] = useState<UserData | null>(
     null
   );
+  const [currentUserData, setCurrentUserData] = useState<UserData | null>(null);
+  const [selectedMessage, setSelectedMessage] =
+    useState<SelectedMessageProps | null>(null);
+  const [messages, setMessages] = useState<MessageObject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [messages, setMessages] = useState<MessageProps[]>([]);
-  const { userId } = useParams<any>();
+  const { interlocutorId } = useParams<any>();
   const { currentUser } = useAuth();
 
-  let path = getPathByUsers(currentUser!.uid, userId);
-  const controlsRef = useRef() as React.MutableRefObject<HTMLInputElement>;
-  const inputRef = useRef() as React.MutableRefObject<HTMLFormElement>;
+  const db = getDatabase();
+  const path = getRefPathByUsersNames(currentUser!.uid, interlocutorId);
 
-  function writeMessage(message: MessageProps) {
-    const db = getDatabase();
+  const controlsRef = useRef() as React.MutableRefObject<HTMLDivElement>;
+  const formRef = useRef() as React.MutableRefObject<HTMLFormElement>;
+
+  function writeMessage(message: MessageObject) {
     const messageListRef = ref(db, "messages/" + path);
     const newMessageRef = push(messageListRef);
     return set(newMessageRef, message);
   }
 
   function updateMessage(text: string, messageId: string) {
-    const db = getDatabase();
     const messageRef = ref(db, "messages/" + path + "/" + messageId);
     return update(messageRef, { text: text });
   }
 
-  async function setChatsForUsers(message: MessageProps) {
-    const db = getDatabase();
+  async function setChatsForUsers(message: MessageObject) {
     const currentUserChatRef = ref(
       db,
       "chats/" + currentUser!.uid + "/" + path
     );
-    const m1 = { ...message, interlocutor: currentUser!.uid };
-    const m2 = { ...message, interlocutor: userId };
-    const interlocutorChatRef = ref(db, "chats/" + userId! + "/" + path);
-    await set(currentUserChatRef, m2);
-    await set(interlocutorChatRef, m1);
+    const interlocutorChatRef = ref(
+      db,
+      "chats/" + interlocutorId! + "/" + path
+    );
+    const message1 = { ...message, interlocutorId: currentUser!.uid };
+    const message2 = { ...message, interlocutorId: interlocutorId };
+    await set(currentUserChatRef, message2);
+    await set(interlocutorChatRef, message1);
   }
 
-  function deleteMessage(messageId: string) {
-    const db = getDatabase();
+  async function deleteMessage(messageId: string) {
     const messageRef = ref(db, "messages/" + path + "/" + messageId);
-    return remove(messageRef).then(() => setChosenMessage(null));
+    await remove(messageRef);
+    setSelectedMessage(null);
   }
 
   function resetControls() {
@@ -98,61 +96,43 @@ export default function Chat() {
   }
 
   function getMessages() {
-    const db = getDatabase();
     const postsRef = ref(db, "messages/" + path);
     onValue(postsRef, (snapshot) => {
-      console.time("doSomething");
-      let messages: MessageProps[] = [];
-      let previeousAuthor = "";
+      const messages: MessageObject[] = [];
+      let previousAuthor = "";
       let messagesCounter = 0;
       snapshot.forEach((childSnapshot) => {
-        const data = childSnapshot.val();
-        data.messageId = childSnapshot.key;
-        if (data.author !== previeousAuthor) {
-          if (userId == data.author) {
-            data.isFirst = true;
+        const message = childSnapshot.val();
+        message.id = childSnapshot.key;
+        //если предыдущее сообщение от другого автора
+        if (message.authorId !== previousAuthor) {
+          //и текущее сообщение - от собеседника
+          if (interlocutorId == message.authorId) {
+            //делаем сообщению "отросток" вверх
+            message.hasScionOnTop = true;
           }
-          if (currentUser!.uid == data.author) {
-            data.isLastInRow = true;
+          //если же прошлое сообщение от другого автора
+          //и текущее сообщение от текущего пользователя
+          if (currentUser!.uid == message.authorId) {
+            //делаем "отросток" вниз
+            message.hasScionOnBottom = true;
           }
-          previeousAuthor = data.author;
+          previousAuthor = message.authorId;
         } else {
-          if (data.author === currentUser!.uid) {
-            messages[messagesCounter - 1].isLastInRow = false;
-
-            data.isLastInRow = true;
+          //если предыдущее сообщение от того же автора
+          //и этот автор - текущий юзер
+          if (message.authorId === currentUser!.uid) {
+            //убираем "отросток" у предыдущего сообщения, и делаем у этого
+            messages[messagesCounter - 1].hasScionOnBottom = false;
+            message.hasScionOnBottom = true;
           }
         }
         messagesCounter++;
-        messages.push(data);
+        messages.push(message);
       });
-      //firebase не поддерживает сортировку по убыванию
       setMessages(messages);
-
-      console.timeEnd("doSomething");
     });
   }
-
-  useEffect(() => {
-    getUserData(userId).then((snapshot) => setUserData(snapshot.val()));
-    getUserData(currentUser!.uid).then((snapshot) =>
-      setCurrentUserData(snapshot.val())
-    );
-  }, []);
-
-  useEffect(() => {
-    getMessages();
-    return () => {
-      const db = getDatabase();
-      off(ref(db, "chat/" + path));
-    };
-  }, []);
-
-  useEffect(() => {
-    if (userData && currentUserData) {
-      setIsLoading(false);
-    }
-  }, [userData, currentUserData]);
 
   function toggleEditing() {
     setIsEditing((isEditing) => !isEditing);
@@ -162,29 +142,48 @@ export default function Chat() {
     setIsDeleting((isDeleting) => !isDeleting);
   }
 
-  const editForm = chosenMessage ? (
+  useEffect(() => {
+    getUserData(interlocutorId).then((snapshot) =>
+      setInterlocutorData(snapshot.val())
+    );
+    getUserData(currentUser!.uid).then((snapshot) =>
+      setCurrentUserData(snapshot.val())
+    );
+    getMessages();
+    return () => {
+      off(ref(db, "chat/" + path));
+    };
+  }, []);
+
+  useEffect(() => {
+    if (interlocutorData && currentUserData) {
+      setIsLoading(false);
+    }
+  }, [interlocutorData, currentUserData]);
+
+  const editForm = (
     <Formik
-      initialValues={{ text: chosenMessage.text }}
+      initialValues={{ text: selectedMessage?.text }}
+      //реинициализация для изменения initialValues после выбора сообщения
       enableReinitialize={true}
       onSubmit={async function (values) {
         try {
-          await updateMessage(values.text, chosenMessage!.messageId);
+          await updateMessage(values.text!, selectedMessage!.id);
           toggleEditing();
-          setChosenMessage(null);
+          setSelectedMessage(null);
         } catch (e) {
           console.log(e);
         }
       }}
     >
-      {({ handleChange }) => (
-        <Form ref={inputRef}>
+      {() => (
+        <Form ref={formRef}>
           <Field name="text" />
-
           <button type="submit">update</button>
         </Form>
       )}
     </Formik>
-  ) : null;
+  );
 
   const sendForm = (
     <Formik
@@ -193,8 +192,8 @@ export default function Chat() {
         try {
           const message = {
             text: values.text,
-            createdAt: serverTimestamp().toString(),
-            author: currentUser!.uid,
+            createdAt: serverTimestamp(),
+            authorId: currentUser!.uid,
           };
           await writeMessage(message);
           await setChatsForUsers(message);
@@ -203,10 +202,9 @@ export default function Chat() {
         }
       }}
     >
-      {({ handleChange }) => (
+      {() => (
         <Form>
           <Field name="text" />
-
           <button type="submit">send</button>
         </Form>
       )}
@@ -222,11 +220,13 @@ export default function Chat() {
           <div className="chat__header">
             <Avatar
               className="chat__interlocutor-avatar"
-              src={userData!.photoUrl}
+              src={interlocutorData!.photoUrl}
               parent="chat"
             ></Avatar>
-            <div className="interlocutor__name">Федя</div>
-            {chosenMessage ? (
+            <div className="interlocutor__name">
+              {interlocutorData!.fullName}
+            </div>
+            {selectedMessage ? (
               <div className="chat__controls controls" ref={controlsRef}>
                 {isDeleting ? (
                   <div className="post-deletion">
@@ -236,7 +236,7 @@ export default function Chat() {
                     <div className="controls post-deletion__controls">
                       <span
                         className="controls__button"
-                        onClick={() => deleteMessage(chosenMessage!.messageId)}
+                        onClick={() => deleteMessage(selectedMessage!.id)}
                       >
                         yes
                       </span>
@@ -250,7 +250,6 @@ export default function Chat() {
                   </div>
                 ) : (
                   <>
-                    {" "}
                     <span className="controls__button" onClick={toggleEditing}>
                       {isEditing ? "cancel editing" : "edit"}
                     </span>
@@ -261,7 +260,7 @@ export default function Chat() {
                       >
                         delete
                       </span>
-                    )}{" "}
+                    )}
                   </>
                 )}
               </div>
@@ -271,14 +270,14 @@ export default function Chat() {
             {messages.length
               ? messages.map((item) => (
                   <Message
-                    setChosenMessage={setChosenMessage}
+                    id={item.id!}
                     text={item.text}
-                    isMine={item.author === currentUser!.uid}
-                    isFirst={item.isFirst}
-                    isLastInRow={item.isLastInRow}
-                    messageId={item.messageId!}
+                    isMine={item.authorId === currentUser!.uid}
+                    hasScionOnTop={item.hasScionOnTop}
+                    hasScionOnBottom={item.hasScionOnBottom}
+                    setSelectedMessage={setSelectedMessage}
                     controlsRef={controlsRef}
-                    inputRef={inputRef}
+                    formRef={formRef}
                     resetControls={resetControls}
                   ></Message>
                 ))
@@ -286,7 +285,6 @@ export default function Chat() {
           </div>
           <div className="chat__footer">
             {isEditing ? editForm : sendForm}
-
             <Avatar src={currentUserData!.photoUrl} parent="chat"></Avatar>
           </div>
         </div>

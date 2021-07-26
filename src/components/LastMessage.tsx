@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { UserData } from "./UserProfile";
-import { getDatabase, ref, get } from "@firebase/database";
 import { useAuth } from "../contexts/AuthContext";
-import { MessageProps } from "./Chat";
-import { formDate } from "./Post";
+import { MessageObject } from "./Chat";
+import { formateDate } from "./Post";
 import { Link } from "react-router-dom";
-import { getPathByUsers } from "./Chat";
 import { getUserData } from "./UserProfile";
 
 export default function LastMessage({
   text,
   createdAt,
-  author,
-  interlocutor,
-}: MessageProps) {
+  authorId,
+  interlocutorId,
+}: MessageObject) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const { currentUser } = useAuth();
 
   useEffect(() => {
-    getUserData(author).then((snapshot) => setUserData(snapshot.val()));
+    getUserData(interlocutorId as string).then((snapshot) =>
+      setUserData(snapshot.val())
+    );
   }, []);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function LastMessage({
   }, [userData]);
 
   return (
-    <Link to={"chat/" + interlocutor}>
+    <Link to={"chat/" + interlocutorId}>
       <div className="last-message post stone-bordered">
         <div className="last-message__header">
           <div className="last-message__info post__info">
@@ -45,7 +45,7 @@ export default function LastMessage({
               {userData?.fullName}
             </p>
             <p className="last-message__created-at post__created-at">
-              {formDate(createdAt)}
+              {formateDate(createdAt as string)}
             </p>
           </div>
         </div>

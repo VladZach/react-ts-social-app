@@ -127,7 +127,10 @@ function App() {
               component={SearchPeople}
             ></PrivateRoute>
 
-            <PrivateRoute path="/chat/:userId" component={Chat}></PrivateRoute>
+            <PrivateRoute
+              path="/chat/:interlocutorId"
+              component={Chat}
+            ></PrivateRoute>
             <PrivateRoute
               path="/:id"
               key="other-user"

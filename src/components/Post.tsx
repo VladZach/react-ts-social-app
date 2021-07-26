@@ -26,7 +26,7 @@ export interface PostProps {
   authorId: string;
 }
 
-export function formDate(date: string) {
+export function formateDate(dateString: string) {
   const monthNames = [
     "January",
     "February",
@@ -41,13 +41,11 @@ export function formDate(date: string) {
     "November",
     "December",
   ];
-  const newDate = new Date(date);
-  return `${newDate.getDate()} ${
-    monthNames[newDate.getMonth()]
-  } ${newDate.getFullYear()} ${newDate.getHours()}:${
-    newDate.getMinutes() < 10
-      ? "0" + newDate.getMinutes()
-      : newDate.getMinutes()
+  const date = new Date(dateString);
+  return `${date.getDate()} ${
+    monthNames[date.getMonth()]
+  } ${date.getFullYear()} ${date.getHours()}:${
+    date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()
   }`;
 }
 
@@ -62,30 +60,29 @@ export default function Post({
   //передаём много пропсов, но избегаем состояния загрузки в самом компоненте
   //загрузка усложняет и без того сложную логику рендера
   const { currentUser }: any = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [comments, setComments] = useState<CommentProps[]>([]);
   const [likesAmount, setLikesAmount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
-  const [comments, setComments] = useState<CommentProps[]>([]);
-  const [isCommenting, setIsCommenting] = useState(false);
-  //удалить, не нужен
-  const textRef = useRef<HTMLSpanElement>(null);
 
-  function getLike() {
-    const db = getDatabase();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCommenting, setIsCommenting] = useState(false);
+
+  const db = getDatabase();
+
+  function watchLike() {
     const likeRef = ref(db, "likes/posts/" + postId + "/" + currentUser.uid);
     onValue(likeRef, (snapshot) => {
-      if (snapshot.val()) {
+      if (snapshot.exists()) {
         setIsLiked(true);
       } else setIsLiked(false);
     });
   }
 
-  function getLikesAmount() {
-    const db = getDatabase();
+  function watchLikesAmount() {
     const likeRef = ref(db, "likes/posts/" + postId);
     onValue(likeRef, (snapshot) => {
-      if (snapshot.val()) {
+      if (snapshot.exists()) {
         setLikesAmount(snapshot.size);
       } else {
         setLikesAmount(0);
@@ -93,11 +90,10 @@ export default function Post({
     });
   }
 
-  function getComments() {
-    const db = getDatabase();
+  function watchComments() {
     const commentsRef = ref(db, "comments/" + postId);
     onValue(commentsRef, (snapshot) => {
-      let comments: any = [];
+      const comments: CommentProps[] = [];
       snapshot.forEach((childSnapshot) => {
         const comment = childSnapshot.val();
         comment.commentId = childSnapshot.key;
@@ -109,31 +105,27 @@ export default function Post({
   }
 
   useEffect(() => {
-    getComments();
+    watchComments();
     return () => {
-      const db = getDatabase();
       off(ref(db, "comments/" + postId));
     };
   }, []);
 
   useEffect(() => {
-    getLike();
+    watchLike();
     return () => {
-      const db = getDatabase();
       off(ref(db, "likes/posts/" + postId + "/" + currentUser.uid));
     };
   }, []);
 
   useEffect(() => {
-    getLikesAmount();
+    watchLikesAmount();
     return () => {
-      const db = getDatabase();
       off(ref(db, "likes/posts/" + postId));
     };
   }, []);
 
   function deletePost(postId: string) {
-    const db = getDatabase();
     const postRef = ref(db, "posts/" + postId);
     const userPostRef = ref(
       db,
@@ -163,31 +155,52 @@ export default function Post({
       .catch((e) => console.log(e));
   }
 
+  function writeComment(text: string) {
+    let trimedText = text.trim();
+    if (trimedText) {
+      const postRef = ref(db, "comments/" + postId);
+      const commentRef = push(postRef);
+      return set(commentRef, {
+        authorId: currentUser.uid,
+        text: trimedText,
+        createdAt: serverTimestamp(),
+      });
+    }
+  }
+
+  function toggleEditing() {
+    setIsEditing((isEditing) => !isEditing);
+  }
+
+  function toggleDeleting() {
+    setIsDeleting((isDeleting) => !isDeleting);
+  }
+
   function like(postId: string) {
-    const db = getDatabase();
     const likeRef = ref(db, "likes/posts/" + postId + "/" + currentUser.uid);
     set(likeRef, true);
   }
 
   function unlike(postId: string) {
-    const db = getDatabase();
     const likeRef = ref(db, "likes/posts/" + postId + "/" + currentUser.uid);
     remove(likeRef);
+  }
+
+  function editPost(text: string) {
+    let trimedText = text.trim();
+    if (trimedText) {
+      const postRef = ref(db, "posts/" + postId);
+      return update(postRef, { text: trimedText });
+    }
   }
 
   const editForm = (
     <Formik
       initialValues={{ text: text }}
-      onSubmit={async function (values) {
+      onSubmit={async function ({ text }) {
         try {
-          let trimedText = values.text.trim();
-          if (trimedText) {
-            const db = getDatabase();
-            const postRef = ref(db, "posts/" + currentUser.uid + "/" + postId);
-            update(postRef, { text: trimedText }).then(() =>
-              setIsEditing(false)
-            );
-          }
+          await editPost(text);
+          setIsEditing(false);
         } catch (e) {
           console.log(e);
         }
@@ -216,20 +229,10 @@ export default function Post({
   const commentForm = (
     <Formik
       initialValues={{ text: "" }}
-      onSubmit={async function (values) {
+      onSubmit={async function ({ text }) {
         try {
-          let trimedText = values.text.trim();
-          if (trimedText) {
-            const db = getDatabase();
-            const postRef = ref(db, "comments/" + postId);
-            const commentRef = push(postRef);
-            set(commentRef, {
-              author: currentUser.uid,
-              text: trimedText,
-              createdAt: serverTimestamp(),
-            });
-            setIsCommenting(false);
-          }
+          await writeComment(text);
+          setIsCommenting(false);
         } catch (e) {
           console.log(e);
         }
@@ -263,13 +266,6 @@ export default function Post({
     </Formik>
   );
 
-  function toggleEditing() {
-    setIsEditing((isEditing) => !isEditing);
-  }
-
-  function toggleDeleting() {
-    setIsDeleting((isDeleting) => !isDeleting);
-  }
   return (
     <div className={`post brick-bordered post_commenting`}>
       {isDeleting ? (
@@ -293,7 +289,7 @@ export default function Post({
             <div className="post__info">
               <Avatar src={photoUrl} parent="post"></Avatar>
               <p className="post__author-name">{userName}</p>
-              <p className="post__created-at">{formDate(createdAt)}</p>
+              <p className="post__created-at">{formateDate(createdAt)}</p>
             </div>
             <div className="post__controls controls">
               <span className="controls__button" onClick={toggleEditing}>
@@ -310,9 +306,7 @@ export default function Post({
             editForm
           ) : (
             <>
-              <span ref={textRef} className="post__text">
-                {text.replace("_b", "\n")}
-              </span>
+              <span className="post__text">{text}</span>
               <div className="post__footer">
                 <div className="post__icon-container">
                   <svg
@@ -390,7 +384,7 @@ export default function Post({
                         fillOpacity="1"
                       ></use>
                     </g>
-                  </svg>{" "}
+                  </svg>
                   {likesAmount > 0 ? likesAmount : null}
                 </div>
               </div>
@@ -401,7 +395,7 @@ export default function Post({
               <Comment
                 commentId={item.commentId}
                 postId={item.postId}
-                author={item.author}
+                authorId={item.authorId}
                 text={item.text}
                 createdAt={item.createdAt}
                 key={item.createdAt + index}

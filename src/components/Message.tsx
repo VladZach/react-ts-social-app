@@ -1,34 +1,34 @@
 import React, { useRef, useEffect, MouseEvent } from "react";
-import { ChosenMessageProps } from "./Chat";
+import { SelectedMessageProps } from "./Chat";
 
-interface Props {
-  isLastInRow?: boolean;
-  isMine: boolean;
-  isFirst?: boolean;
+interface MessageProps {
+  id: string;
   text: string;
-  messageId: string;
-  setChosenMessage: React.Dispatch<
-    React.SetStateAction<null | ChosenMessageProps>
+  isMine: boolean;
+  hasScionOnBottom?: boolean;
+  hasScionOnTop?: boolean;
+  setSelectedMessage: React.Dispatch<
+    React.SetStateAction<null | SelectedMessageProps>
   >;
-  controlsRef: React.MutableRefObject<HTMLInputElement | undefined>;
-  inputRef: React.MutableRefObject<HTMLFormElement | undefined>;
+  controlsRef: React.MutableRefObject<HTMLDivElement | undefined>;
+  formRef: React.MutableRefObject<HTMLFormElement | undefined>;
   resetControls: () => void;
 }
 
 export default function Message({
-  isLastInRow,
-  isMine,
-  isFirst,
+  id,
   text,
-  setChosenMessage,
-  messageId,
+  hasScionOnBottom,
+  isMine,
+  hasScionOnTop,
+  setSelectedMessage,
   controlsRef,
-  inputRef,
+  formRef,
   resetControls,
-}: Props) {
-  const className = isLastInRow
+}: MessageProps) {
+  const className = hasScionOnBottom
     ? "thought-bubble__body thought-bubble__body-right"
-    : isFirst
+    : hasScionOnTop
     ? "thought-bubble__body thought-bubble__body-left"
     : "thought-bubble__body message_round";
   const alignmentClass = isMine
@@ -45,9 +45,9 @@ export default function Message({
         messageRef.current &&
         !messageRef.current.contains(event.target as HTMLDivElement) &&
         !controlsRef.current?.contains(event.target as HTMLDivElement) &&
-        !inputRef.current?.contains(event.target as HTMLDivElement)
+        !formRef.current?.contains(event.target as HTMLDivElement)
       ) {
-        setChosenMessage(null);
+        setSelectedMessage(null);
         resetControls();
       }
     }
@@ -63,7 +63,8 @@ export default function Message({
   return (
     <div
       onClick={() => {
-        setChosenMessage({ text: text, messageId: messageId });
+        setSelectedMessage({ text: text, id: id });
+        console.log({ text: text, id: id });
       }}
       ref={messageRef}
       className={"thought-bubble thought-bubble__message " + alignmentClass}
@@ -71,12 +72,12 @@ export default function Message({
       <div className={className}>
         <span className="thought-bubble__text">{text}</span>
       </div>
-      {isLastInRow ? (
+      {hasScionOnBottom ? (
         <>
           <div className="thought-bubble__decoration-black thought-bubble-right__decoration-black"></div>
           <div className="thought-bubble__decoration-white thought-bubble-right__decoration-white"></div>
         </>
-      ) : isFirst ? (
+      ) : hasScionOnTop ? (
         <>
           <div className="thought-bubble__decoration-black thought-bubble-left__decoration-black"></div>
           <div className="thought-bubble__decoration-white thought-bubble-left__decoration-white"></div>

@@ -1,5 +1,5 @@
+import React, { useState } from "react";
 import {
-  get,
   getDatabase,
   ref,
   remove,
@@ -8,20 +8,18 @@ import {
   onValue,
   off,
 } from "firebase/database";
-import React, { useState } from "react";
 import { useEffect } from "react";
 import { Formik, Form, Field } from "formik";
 import { useAuth } from "../contexts/AuthContext";
-import Avatar from "./Avatar";
-import Loader from "./Loader";
-import { formDate } from "./Post";
+import { formateDate } from "./Post";
 import { UserData, getUserData } from "./UserProfile";
 import TextareaAutosize from "react-textarea-autosize";
+import Avatar from "./Avatar";
 
 export interface CommentProps {
   text: string;
   createdAt: string;
-  author: string;
+  authorId: string;
   commentId: string;
   postId: string;
 }
@@ -29,7 +27,7 @@ export interface CommentProps {
 export default function Comment({
   text,
   createdAt,
-  author,
+  authorId,
   commentId,
   postId,
 }: CommentProps) {
@@ -161,7 +159,7 @@ export default function Comment({
 
   useEffect(() => {
     let isSubscribed = true;
-    getUserData(author).then((snapshot) => setUserData(snapshot.val()));
+    getUserData(authorId).then((snapshot) => setUserData(snapshot.val()));
     return () => {
       isSubscribed = false;
     };
@@ -195,7 +193,7 @@ export default function Comment({
             <div className="comment__info">
               <Avatar src={userData!.photoUrl} parent="comment"></Avatar>
               <p className="comment__author-name">{userData!.fullName}</p>
-              <p className="comment__created-at">{formDate(createdAt)}</p>
+              <p className="comment__created-at">{formateDate(createdAt)}</p>
             </div>
             <div className="post__controls comment__controls controls">
               <span className="controls__button" onClick={toggleEditing}>

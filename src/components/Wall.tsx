@@ -15,12 +15,12 @@ import { UserDataWithId } from "./UserProfile";
 export default function Wall({ fullName, photoUrl, userId }: UserDataWithId) {
   const { currentUser } = useAuth();
 
-  const isMine = currentUser!.uid === userId;
-
   const [posts, setPosts] = useState<PostProps[]>([]);
 
-  function getPosts() {
-    const db = getDatabase();
+  const isMine = currentUser!.uid === userId;
+  const db = getDatabase();
+
+  function watchPosts() {
     const postsRef = ref(db, "users/" + userId + "/posts/");
     onValue(postsRef, (snapshot) => {
       let posts: PostProps[] = [];
@@ -41,9 +41,8 @@ export default function Wall({ fullName, photoUrl, userId }: UserDataWithId) {
   }
 
   useEffect(() => {
-    getPosts();
+    watchPosts();
     return () => {
-      const db = getDatabase();
       off(ref(db, "users/" + userId + "/posts/"));
     };
   }, []);
@@ -52,7 +51,7 @@ export default function Wall({ fullName, photoUrl, userId }: UserDataWithId) {
     <div className="wall bordered-container">
       {isMine ? <TellYourStory></TellYourStory> : null}
 
-      {posts?.map((item, index) => (
+      {posts?.map((item) => (
         <Post
           userName={fullName}
           text={item.text}
