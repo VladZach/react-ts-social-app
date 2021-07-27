@@ -36,84 +36,61 @@ export default function UserProfile({
   whereFrom,
   userId,
 }: UserDataWithId) {
-  const { currentUser, logout }: any = useAuth();
-  const isMine = currentUser.uid === userId;
+  const { currentUser, logout } = useAuth();
+  const isMine = currentUser!.uid === userId;
   const [isSubscribed, setIsSubscribed] = useState(false);
-
+  const db = getDatabase();
   const history = useHistory();
 
   let placeholder = "????????????";
 
-  async function toggleSubscribe() {
-    const db = getDatabase();
-    const subscriptionRef = ref(
-      db,
-      "users/" + currentUser.uid + "/subscriptions/" + userId
-    );
-    const subscriberRef = ref(
-      db,
-      "users/" + userId + "/subscribers/" + currentUser.uid
-    );
-
-    if (isSubscribed) {
-    }
-    await set(subscriptionRef, !isSubscribed);
-    await set(subscriberRef, !isSubscribed);
-  }
-
   async function subscribe() {
-    const db = getDatabase();
     const subscriptionRef = ref(
       db,
-      "users/" + currentUser.uid + "/subscriptions/" + userId
+      "users/" + currentUser!.uid + "/subscriptions/" + userId
     );
     const subscriberRef = ref(
       db,
-      "users/" + userId + "/subscribers/" + currentUser.uid
+      "users/" + userId + "/subscribers/" + currentUser!.uid
     );
     const postsRef = ref(db, "users/" + userId + "/posts/");
-    const newsRef = ref(db, "users/" + currentUser.uid + "/news/");
+    const newsRef = ref(db, "users/" + currentUser!.uid + "/news/");
     const postsSnapshot = await get(postsRef);
     if (postsSnapshot.val()) {
       await update(newsRef, postsSnapshot.val());
-      console.log(postsSnapshot.val());
     }
     await set(subscriptionRef, true);
     await set(subscriberRef, true);
   }
 
   async function unsubscribe() {
-    const db = getDatabase();
     const subscriptionRef = ref(
       db,
-      "users/" + currentUser.uid + "/subscriptions/" + userId
+      "users/" + currentUser!.uid + "/subscriptions/" + userId
     );
     const subscriberRef = ref(
       db,
-      "users/" + userId + "/subscribers/" + currentUser.uid
+      "users/" + userId + "/subscribers/" + currentUser!.uid
     );
     const postsRef = ref(db, "users/" + userId + "/posts/");
-    const newsRef = ref(db, "users/" + currentUser.uid + "/news/");
+    const newsRef = ref(db, "users/" + currentUser!.uid + "/news/");
     const postsSnapshot = await get(postsRef);
     const posts: any = {};
     if (postsSnapshot.val()) {
       postsSnapshot.forEach((item) => {
         const key = item.key;
-        console.log(item);
         posts[key!] = null;
       });
-      console.log(posts);
       await update(newsRef, posts);
     }
     await remove(subscriptionRef);
     await remove(subscriberRef);
   }
 
-  function getSubscription() {
-    const db = getDatabase();
+  function watchSubscription() {
     const subscriptionRef = ref(
       db,
-      "users/" + currentUser.uid + "/subscriptions/" + userId
+      "users/" + currentUser!.uid + "/subscriptions/" + userId
     );
     onValue(subscriptionRef, (snapshot) => {
       setIsSubscribed(snapshot.val());
@@ -121,12 +98,11 @@ export default function UserProfile({
   }
 
   useEffect(() => {
-    getSubscription();
+    watchSubscription();
     return () => {
-      const db = getDatabase();
       const subscriptionRef = ref(
         db,
-        "users/" + currentUser.uid + "/subscriptions/" + userId
+        "users/" + currentUser!.uid + "/subscriptions/" + userId
       );
       off(subscriptionRef);
     };
@@ -196,7 +172,6 @@ export default function UserProfile({
         <div className="user-text user-info__text">
           <span className="user-text__header">from:</span>
           <span className="user-text__text">
-            {" "}
             {whereFrom ? whereFrom : placeholder}
           </span>
         </div>

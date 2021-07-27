@@ -4,7 +4,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import { cardMDFormValues } from "./Login";
-import { getDatabase, ref, set } from "firebase/database";
 import { ScepticGuyPageProps } from "./ScepticGuyPage";
 
 export default function Reauthenticate({

@@ -27,6 +27,7 @@ export default function UpdateProfile({
   const [photoPreview, setPhotoPreview] = useState<string | null | ArrayBuffer>(
     null
   );
+  const db = getDatabase();
 
   interface userProfileValues {
     [index: string]: string | File | undefined;
@@ -41,7 +42,6 @@ export default function UpdateProfile({
   }
 
   function getFullUserData() {
-    const db = getDatabase();
     const userRef = ref(db, "users/" + currentUser!.uid);
     const data: userProfileValues = {
       email: currentUser?.email!,
@@ -69,7 +69,6 @@ export default function UpdateProfile({
           data[key] = localStorage.getItem(key)!;
         }
       }
-      console.log(data);
       setUserData(data);
     });
   }
@@ -119,8 +118,17 @@ export default function UpdateProfile({
       onSubmit={async function (values) {
         try {
           const promises = [];
-          const db = getDatabase();
           let photoUrl = "";
+          //если есть фото, загружаем его в storage. Url для загрузки записываем в photoUrl юзеру
+
+          if (values.email !== currentUser!.email) {
+            promises.push(updateEmail(values.email!));
+          }
+          if (values.password) {
+            promises.push(updatePassword(values.password));
+          }
+
+          await Promise.all(promises);
 
           if (values.photo) {
             const storage = getStorage();
@@ -143,28 +151,16 @@ export default function UpdateProfile({
             aboutMe: aboutMe,
             whereFrom: whereFrom,
           };
-
-          promises.push(update(userRef, userObj));
-          if (values.email !== currentUser!.email) {
-            promises.push(updateEmail(values.email!));
-          }
-          if (values.password) {
-            promises.push(updatePassword(values.password));
-          }
-          console.log(3);
-          await Promise.all(promises).catch((e) => {
-            console.log(e);
-            throw e;
-          });
+          await update(userRef, userObj);
 
           for (const key of Object.keys(userData!)) {
-            console.log(localStorage.getItem(key));
             localStorage.removeItem(key);
           }
 
           history.push("/");
         } catch (e) {
           if (e.code === "auth/requires-recent-login") {
+            //если надо реавторизироваться - сохраняем введённые значение в ls
             for (const [key, value] of Object.entries(values)) {
               localStorage.setItem(key, value as string);
             }

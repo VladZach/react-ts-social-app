@@ -19,39 +19,40 @@ export function computeOffset(element: HTMLElement, container: HTMLElement) {
 }
 
 export default function TellYourStory() {
-  const { currentUser }: any = useAuth();
+  const { currentUser } = useAuth();
 
   const [isTelling, setIsTelling] = useState(false);
   const [inputHasValue, setInputHasValue] = useState(false);
+  const db = getDatabase();
 
   const form = useRef<HTMLFormElement>(null);
   const textAreaLabel = useRef<HTMLSpanElement>(null);
   const textArea = useRef<HTMLTextAreaElement>(null);
 
   async function writePost(text: string) {
-    const db = getDatabase();
-    const postListRef = ref(db, "posts/");
+    const postsListRef = ref(db, "posts/");
     const subscribersListRef = ref(
       db,
-      "users/" + currentUser.uid + "/subscribers/"
+      "users/" + currentUser!.uid + "/subscribers/"
     );
-
-    const newPostRef = await push(postListRef);
-    let key = newPostRef.key;
+    const newPostRef = await push(postsListRef);
     await set(newPostRef, {
       text: text,
       createdAt: serverTimestamp(),
-      author: currentUser.uid,
+      author: currentUser!.uid,
     });
-    await set(ref(db, "users/" + currentUser.uid + "/posts/" + key), true);
+
+    const key = newPostRef.key;
+    const userPostRef = ref(db, "users/" + currentUser!.uid + "/posts/" + key);
+    await set(userPostRef, true);
     await get(subscribersListRef).then((snapshot) => {
       const promises: Promise<void>[] = [];
       snapshot.forEach((subscriber) => {
-        const subscriberRef = ref(
+        const subscriberNewRef = ref(
           db,
           "users/" + subscriber.key + "/news/" + key
         );
-        promises.push(set(subscriberRef, true));
+        promises.push(set(subscriberNewRef, true));
       });
       return Promise.all(promises);
     });
@@ -64,10 +65,14 @@ export default function TellYourStory() {
     const label = textAreaLabel.current!;
     const textareaOffset = computeOffset(input, container);
     const headerOffset = computeOffset(label, container);
+    //увеличиваем контейнер
     container.style.cssText =
       "padding-bottom: 140px; border: 10px solid white;";
+    //увеличиваем и двигаем textarea
     input.style.cssText = `height: 5em; top: 85px; left: ${textareaOffset}px`;
+    //двигаем label
     label.style.left = headerOffset + "px";
+    //вот это вот
     input.dispatchEvent(new Event("change", { bubbles: true }));
     setIsTelling(true);
   }
@@ -75,7 +80,7 @@ export default function TellYourStory() {
   function resetForm() {
     const input = textArea.current!;
     const value = input.value;
-    if (value) return;
+    if (value.trim()) return;
     const container = form.current!;
     const label = textAreaLabel.current!;
     input.style.cssText = "";
@@ -86,8 +91,11 @@ export default function TellYourStory() {
 
   function toggleFormControlls() {
     const input = textArea.current!;
-    const value = input.value.trim();
-    if (value) {
+    const trimmedValue = input.value.trim();
+    if (input.value && !trimmedValue) {
+      clearInput();
+      setInputHasValue(false);
+    } else if (trimmedValue) {
       setInputHasValue(true);
     } else {
       setInputHasValue(false);
