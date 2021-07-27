@@ -30,14 +30,14 @@ export default function LastMessage({
   }, [userData]);
 
   return (
-    <Link to={"chat/" + interlocutorId}>
+    <Link className="chats__link" to={"chat/" + interlocutorId}>
       <div className="last-message post stone-bordered">
-        <div className="last-message__header">
-          <div className="last-message__info post__info">
-            <div className="last-message__avatar-container post__avatar-container">
-              <div className="last-message__avatar-border post__avatar-border"></div>
+        <div className="last-message__header post__header">
+          <div className="last-message__info">
+            <div className="last-message__avatar-container post__avatar-container avatar-container">
+              <div className="last-message__avatar-border post__avatar-border avatar-border"></div>
               <img
-                className="last-message__avatar post__avatar"
+                className="last-message__avatar post__avatar avatar"
                 src={userData?.photoUrl ? userData.photoUrl : "../avatar.jpg"}
               ></img>
             </div>
@@ -49,7 +49,9 @@ export default function LastMessage({
             </p>
           </div>
         </div>
-        <span className="last-message__text post__text">{text}</span>
+        <span className="last-message__text post__text">
+          {currentUser!.uid === authorId ? "You: " + text : text}
+        </span>
       </div>
     </Link>
   );

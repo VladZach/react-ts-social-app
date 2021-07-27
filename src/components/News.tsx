@@ -30,7 +30,7 @@ export default function News() {
         get(newRef).then((snapshot) => {
           const newsItem = snapshot.val();
           newsItem.postId = item.key;
-          return getUserData(snapshot.val().author).then((userSnap) => {
+          return getUserData(snapshot.val().authorId).then((userSnap) => {
             const user = userSnap.val();
             newsItem.photoUrl = user.photoUrl;
             newsItem.userName = user.fullName;

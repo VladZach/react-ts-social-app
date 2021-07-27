@@ -17,6 +17,7 @@ import {
 } from "firebase/database";
 import { useAuth } from "../contexts/AuthContext";
 import TextareaAutosize from "react-textarea-autosize";
+import { convertCompilerOptionsFromJson } from "typescript";
 export interface PostProps {
   userName: string;
   createdAt: string;
@@ -57,7 +58,7 @@ export default function Post({
 }: PostProps) {
   //передаём много пропсов, но избегаем состояния загрузки в самом компоненте
   //загрузка усложняет и без того сложную логику рендера
-  const { currentUser }: any = useAuth();
+  const { currentUser } = useAuth();
   const [comments, setComments] = useState<CommentProps[]>([]);
   const [likesAmount, setLikesAmount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
@@ -69,9 +70,10 @@ export default function Post({
   const [isCommenting, setIsCommenting] = useState(false);
 
   const db = getDatabase();
+  const isMine = currentUser!.uid == authorId;
 
   function watchLike() {
-    const likeRef = ref(db, "likes/posts/" + postId + "/" + currentUser.uid);
+    const likeRef = ref(db, "likes/posts/" + postId + "/" + currentUser!.uid);
     onValue(likeRef, (snapshot) => {
       if (snapshot.exists()) {
         setIsLiked(true);
@@ -121,7 +123,7 @@ export default function Post({
   useEffect(() => {
     watchLike();
     return () => {
-      off(ref(db, "likes/posts/" + postId + "/" + currentUser.uid));
+      off(ref(db, "likes/posts/" + postId + "/" + currentUser!.uid));
     };
   }, []);
 
@@ -151,11 +153,14 @@ export default function Post({
     const postRef = ref(db, "posts/" + postId);
     const userPostRef = ref(
       db,
-      "users/" + currentUser.uid + "/posts/" + postId
+      "users/" + currentUser!.uid + "/posts/" + postId
     );
     const postLikesRef = ref(db, "likes/posts/" + postId);
     const postCommentsRef = ref(db, "comments/" + postId);
-    const subscribersRef = ref(db, "users/" + currentUser.uid + "subscribers/");
+    const subscribersRef = ref(
+      db,
+      "users/" + currentUser!.uid + "subscribers/"
+    );
     //если оставить кнопки, другой юзер сможет удалить комменты и лайки от поста
     remove(postRef)
       .then(() => remove(userPostRef))
@@ -183,7 +188,7 @@ export default function Post({
       const postRef = ref(db, "comments/" + postId);
       const commentRef = push(postRef);
       return set(commentRef, {
-        authorId: currentUser.uid,
+        authorId: currentUser!.uid,
         text: trimedText,
         createdAt: serverTimestamp(),
       });
@@ -199,12 +204,12 @@ export default function Post({
   }
 
   function like(postId: string) {
-    const likeRef = ref(db, "likes/posts/" + postId + "/" + currentUser.uid);
+    const likeRef = ref(db, "likes/posts/" + postId + "/" + currentUser!.uid);
     set(likeRef, true);
   }
 
   function unlike(postId: string) {
-    const likeRef = ref(db, "likes/posts/" + postId + "/" + currentUser.uid);
+    const likeRef = ref(db, "likes/posts/" + postId + "/" + currentUser!.uid);
     remove(likeRef);
   }
 
@@ -305,16 +310,18 @@ export default function Post({
               <p className="post__author-name">{userName}</p>
               <p className="post__created-at">{formateDate(createdAt)}</p>
             </div>
-            <div className="post__controls controls">
-              <span className="controls__button" onClick={toggleEditing}>
-                {isEditing ? "cancel editing" : "edit"}
-              </span>
-              {isEditing ? null : (
-                <span className="controls__button" onClick={toggleDeleting}>
-                  delete
+            {isMine ? (
+              <div className="post__controls controls">
+                <span className="controls__button" onClick={toggleEditing}>
+                  {isEditing ? "cancel editing" : "edit"}
                 </span>
-              )}
-            </div>
+                {isEditing ? null : (
+                  <span className="controls__button" onClick={toggleDeleting}>
+                    delete
+                  </span>
+                )}
+              </div>
+            ) : null}
           </div>
           {isEditing ? (
             editForm

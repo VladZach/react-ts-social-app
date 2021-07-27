@@ -39,7 +39,7 @@ export default function TellYourStory() {
     await set(newPostRef, {
       text: text,
       createdAt: serverTimestamp(),
-      author: currentUser!.uid,
+      authorId: currentUser!.uid,
     });
 
     const key = newPostRef.key;

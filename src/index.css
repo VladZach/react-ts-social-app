@@ -519,6 +519,10 @@ a:visited {
   border: 10px solid white;
 }
 
+.controls {
+  display: none;
+}
+
 .user-profile:hover .controls {
   display: block;
 }
@@ -715,6 +719,10 @@ a:visited {
 
 /** -------chats-------- **/
 
+.chats__link {
+  width: 100%;
+}
+
 .chats {
   display: flex;
   flex-direction: column;
@@ -895,7 +903,7 @@ textarea::-webkit-scrollbar-thumb {
   color: var(--active-item-color);
 }
 
-.post:hover .controls {
+.post:hover .post__controls {
   display: block;
 }
 
@@ -975,6 +983,12 @@ textarea::-webkit-scrollbar-thumb {
   outline: none;
 }
 
+/** ----------last-message----------- **/
+
+.last-message__info {
+  flex-basis: 100%;
+}
+
 /** ---------comments ---------**/
 
 .comments {
@@ -984,6 +998,11 @@ textarea::-webkit-scrollbar-thumb {
 
 .post__comment {
   margin-bottom: 1.5em;
+  position: relative;
+}
+
+.post .post__comment:first-of-type {
+  padding-top: 1em;
 }
 
 .post__comment:last-of-type {
@@ -1027,7 +1046,12 @@ textarea::-webkit-scrollbar-thumb {
 }
 
 .comment__controls {
-  align-self: center;
+  display: none;
+  font-size: 0.8em;
+}
+
+.post__comment:hover .comment__controls {
+  display: block;
 }
 
 .comment__author-name {
@@ -1043,6 +1067,13 @@ textarea::-webkit-scrollbar-thumb {
 .comment__submit-button:first-of-type {
   margin-left: 1em;
 }
+
+.comment__icon-container {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
 /** --------icon----------- **/
 
 .icon__outer-group use {

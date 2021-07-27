@@ -38,6 +38,7 @@ export default function Comment({
   const [isDeleting, setIsDeleting] = useState(false);
   const [likesAmount, setLikesAmount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const isMine = currentUser!.uid === authorId;
   const db = getDatabase();
 
   function editComment(text: string) {
@@ -188,23 +189,25 @@ export default function Comment({
               <p className="comment__author-name">{userData!.fullName}</p>
               <p className="comment__created-at">{formateDate(createdAt)}</p>
             </div>
-            <div className="post__controls comment__controls controls">
-              <span className="controls__button" onClick={toggleEditing}>
-                {isEditing ? "cancel editing" : "edit"}
-              </span>
-              {isEditing ? null : (
-                <span className="controls__button" onClick={toggleDeleting}>
-                  delete
+            {isMine ? (
+              <div className="comment__controls controls">
+                <span className="controls__button" onClick={toggleEditing}>
+                  {isEditing ? "cancel editing" : "edit"}
                 </span>
-              )}
-            </div>
+                {isEditing ? null : (
+                  <span className="controls__button" onClick={toggleDeleting}>
+                    delete
+                  </span>
+                )}
+              </div>
+            ) : null}
           </div>
           {isEditing ? (
             editForm
           ) : (
             <>
               <span className="comment__text">{text}</span>
-              <div className="post__icon-container">
+              <div className="comment__icon-container">
                 <svg
                   onClick={() =>
                     isLiked ? unlike(commentId) : like(commentId)
