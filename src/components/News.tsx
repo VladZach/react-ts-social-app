@@ -9,17 +9,19 @@ import InfiniteScroll from "react-infinite-scroll-component";
 
 export default function News() {
   const [news, setNews] = useState<PostProps[]>([]);
-  const [scrollPosition, setScrollPosition] = useState(10);
+  const newsPerScroll = 10;
+  const db = getDatabase();
+  const [scrollPosition, setScrollPosition] = useState(newsPerScroll);
   const { currentUser } = useAuth();
   const [totalNewsAmount, setTotalNewsAmount] = useState(0);
 
   async function getNews() {
+    //чтобы избежать срабатывания при инициализации (следовательно, поднятия счётчика)
     if (!totalNewsAmount) return;
-    const db = getDatabase();
+
     const subscriptionsRef = ref(db, "users/" + currentUser!.uid + "/news/");
     const newsRef = query(subscriptionsRef, limitToLast(scrollPosition));
     const news = await get(newsRef);
-
     const newsArr: PostProps[] = [];
     const promises: Promise<void>[] = [];
     news.forEach((item) => {
@@ -40,7 +42,7 @@ export default function News() {
     await Promise.all(promises);
 
     setNews(newsArr.reverse());
-    setScrollPosition((prev) => prev + 10);
+    setScrollPosition((prev) => prev + newsPerScroll);
   }
 
   useEffect(() => {
@@ -48,7 +50,6 @@ export default function News() {
   }, [totalNewsAmount]);
 
   async function getNewsAmount() {
-    const db = getDatabase();
     const subscriptionsRef = ref(db, "users/" + currentUser!.uid + "/news/");
     const news = await get(subscriptionsRef);
     return news.size;
@@ -58,19 +59,17 @@ export default function News() {
       setTotalNewsAmount(newsSize);
     });
   }, []);
-  if (!totalNewsAmount) return null;
+
   return (
     <div className="page page_centralized container">
       <div className="wall bordered-container">
         <InfiniteScroll
           next={getNews}
-          hasMore={totalNewsAmount > scrollPosition - 10}
+          hasMore={totalNewsAmount > news.length}
           loader={<Loader></Loader>}
           dataLength={news.length}
         >
           {news.map((item) => {
-            console.log(totalNewsAmount > scrollPosition - 10);
-            console.log(scrollPosition);
             return <Post key={item.createdAt} {...item}></Post>;
           })}
         </InfiniteScroll>
