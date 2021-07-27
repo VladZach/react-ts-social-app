@@ -38,10 +38,17 @@ export default function Comment({
   const [isDeleting, setIsDeleting] = useState(false);
   const [likesAmount, setLikesAmount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const db = getDatabase();
 
-  function deleteComment(commentId: string) {
-    const db = getDatabase();
-    console.log(commentId);
+  function editComment(text: string) {
+    let trimedText = text.trim();
+    if (trimedText) {
+      const postRef = ref(db, "comments/" + postId + "/" + commentId);
+      return update(postRef, { text: trimedText });
+    }
+  }
+
+  function deleteComment() {
     const commentRef = ref(db, "comments/" + postId + "/" + commentId);
     const commentLikesRef = ref(db, "likes/comments/" + commentId);
     //если оставить кнопки, другой юзер сможет удалить комменты и лайки от поста
@@ -51,8 +58,7 @@ export default function Comment({
       .catch((e) => console.log(e));
   }
 
-  function getLike() {
-    const db = getDatabase();
+  function watchLike() {
     const likeRef = ref(
       db,
       "likes/comments/" + commentId + "/" + currentUser!.uid
@@ -64,8 +70,7 @@ export default function Comment({
     });
   }
 
-  function getLikesAmount() {
-    const db = getDatabase();
+  function watchLikesAmount() {
     const likeRef = ref(db, "likes/comments/" + commentId);
     onValue(likeRef, (snapshot) => {
       if (snapshot.val()) {
@@ -77,7 +82,6 @@ export default function Comment({
   }
 
   function like(commentId: string) {
-    const db = getDatabase();
     const likeRef = ref(
       db,
       "likes/comments/" + commentId + "/" + currentUser!.uid
@@ -87,7 +91,6 @@ export default function Comment({
   }
 
   function unlike(commentId: string) {
-    const db = getDatabase();
     const likeRef = ref(
       db,
       "likes/comments/" + commentId + "/" + currentUser!.uid
@@ -95,35 +98,49 @@ export default function Comment({
     remove(likeRef);
   }
 
+  function toggleEditing() {
+    setIsEditing((isEditing) => !isEditing);
+  }
+
+  function toggleDeleting() {
+    setIsDeleting((isDeleting) => !isDeleting);
+  }
+
   useEffect(() => {
-    getLike();
+    watchLike();
     return () => {
-      const db = getDatabase();
       off(ref(db, "likes/comments/" + commentId + "/" + currentUser!.uid));
     };
   }, []);
 
   useEffect(() => {
-    getLikesAmount();
+    watchLikesAmount();
     return () => {
-      const db = getDatabase();
       off(ref(db, "likes/comments/" + commentId));
     };
   }, []);
 
+  useEffect(() => {
+    let isSubscribed = true;
+    getUserData(authorId).then((snapshot) => setUserData(snapshot.val()));
+    return () => {
+      isSubscribed = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (userData) {
+      setIsLoading(false);
+    }
+  }, [userData]);
+
   const editForm = (
     <Formik
       initialValues={{ text: text }}
-      onSubmit={async function (values) {
+      onSubmit={async function ({ text }) {
         try {
-          let trimedText = values.text.trim();
-          if (trimedText) {
-            const db = getDatabase();
-            const postRef = ref(db, "comments/" + postId + "/" + commentId);
-            update(postRef, { text: trimedText }).then(() =>
-              setIsEditing(false)
-            );
-          }
+          await editComment(text);
+          setIsEditing(false);
         } catch (e) {
           console.log(e);
         }
@@ -149,37 +166,13 @@ export default function Comment({
     </Formik>
   );
 
-  function toggleEditing() {
-    setIsEditing((isEditing) => !isEditing);
-  }
-
-  function toggleDeleting() {
-    setIsDeleting((isDeleting) => !isDeleting);
-  }
-
-  useEffect(() => {
-    let isSubscribed = true;
-    getUserData(authorId).then((snapshot) => setUserData(snapshot.val()));
-    return () => {
-      isSubscribed = false;
-    };
-  }, []);
-  useEffect(() => {
-    if (userData) {
-      setIsLoading(false);
-    }
-  }, [userData]);
-
   return isLoading ? null : (
     <div className="comment post__comment">
       {isDeleting ? (
         <div className="post-deletion">
           <div className="post-deletion__header">delete this post</div>
           <div className="controls post-deletion__controls">
-            <span
-              className="controls__button"
-              onClick={() => deleteComment(commentId)}
-            >
+            <span className="controls__button" onClick={deleteComment}>
               yes
             </span>
             <span className="controls__button" onClick={toggleDeleting}>
@@ -210,7 +203,7 @@ export default function Comment({
             editForm
           ) : (
             <>
-              <span className="comment__text">{text.replace("_b", "\n")}</span>
+              <span className="comment__text">{text}</span>
               <div className="post__icon-container">
                 <svg
                   onClick={() =>

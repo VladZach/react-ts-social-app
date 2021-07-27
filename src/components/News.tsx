@@ -22,10 +22,6 @@ export default function News() {
 
     const newsArr: PostProps[] = [];
     const promises: Promise<void>[] = [];
-    console.log(news.val());
-    console.log(totalNewsAmount > scrollPosition);
-    console.log(scrollPosition);
-    console.log(totalNewsAmount);
     news.forEach((item) => {
       const newRef = ref(db, "posts/" + item.key);
       promises.push(

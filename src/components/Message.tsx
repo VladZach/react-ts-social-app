@@ -64,7 +64,6 @@ export default function Message({
     <div
       onClick={() => {
         setSelectedMessage({ text: text, id: id });
-        console.log({ text: text, id: id });
       }}
       ref={messageRef}
       className={"thought-bubble thought-bubble__message " + alignmentClass}

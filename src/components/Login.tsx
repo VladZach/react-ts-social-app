@@ -45,9 +45,9 @@ export default function Login({
       validate={validate}
       validateOnBlur={false}
       validateOnChange={false}
-      onSubmit={async function (values, { setSubmitting }) {
+      onSubmit={async function ({ email, password }) {
         try {
-          await login(values.email, values.password);
+          await login(email, password);
           history.push("/");
         } catch (e) {
           setSubmissionError("Failed to log in. Check your email and password");

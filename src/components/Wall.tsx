@@ -13,10 +13,9 @@ import {
 import { UserDataWithId } from "./UserProfile";
 
 export default function Wall({ fullName, photoUrl, userId }: UserDataWithId) {
-  const { currentUser } = useAuth();
-
   const [posts, setPosts] = useState<PostProps[]>([]);
 
+  const { currentUser } = useAuth();
   const isMine = currentUser!.uid === userId;
   const db = getDatabase();
 
@@ -29,9 +28,9 @@ export default function Wall({ fullName, photoUrl, userId }: UserDataWithId) {
         const postRef = ref(db, "posts/" + childSnapshot.key);
         promises.push(
           get(postRef).then((snapshot) => {
-            const data = snapshot.val();
-            data.postId = snapshot.key;
-            posts.push(data);
+            const post = snapshot.val();
+            post.postId = snapshot.key;
+            posts.push(post);
           })
         );
       });
@@ -51,10 +50,9 @@ export default function Wall({ fullName, photoUrl, userId }: UserDataWithId) {
     <div className="wall bordered-container">
       {isMine ? <TellYourStory></TellYourStory> : null}
 
-      {posts?.map((item) => (
+      {posts.map((item) => (
         <Post
           userName={fullName}
-          text={item.text}
           createdAt={item.createdAt}
           postId={item.postId}
           key={item.createdAt}

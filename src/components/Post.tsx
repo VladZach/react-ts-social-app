@@ -19,7 +19,6 @@ import { useAuth } from "../contexts/AuthContext";
 import TextareaAutosize from "react-textarea-autosize";
 export interface PostProps {
   userName: string;
-  text: string;
   createdAt: string;
   postId: string;
   photoUrl: string;
@@ -51,7 +50,6 @@ export function formateDate(dateString: string) {
 
 export default function Post({
   userName,
-  text,
   createdAt,
   postId,
   photoUrl,
