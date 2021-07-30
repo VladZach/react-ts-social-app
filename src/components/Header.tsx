@@ -1,7 +1,53 @@
-import React from "react";
+import {
+  getDatabase,
+  onValue,
+  ref,
+  off,
+  get,
+  onChildChanged,
+  onChildAdded,
+} from "firebase/database";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Header() {
+  const [messagesCounter, setMessagesCounter] = useState(0);
+  const { currentUser } = useAuth();
+  const db = getDatabase();
+
+  function watchMessagesCounter() {
+    const chatsRef = ref(db, "chats/" + currentUser!.uid);
+    //for changes in already existing chats
+    onChildChanged(chatsRef, (chat) => {
+      //OnChildSomething-observers put in callback only that exactly
+      // child on which "Something" happened
+      getInitialMessagesCounter();
+    });
+    //for first message in newly created chat
+    onChildAdded(chatsRef, (chat) => {
+      getInitialMessagesCounter();
+    });
+  }
+  async function getInitialMessagesCounter() {
+    const chatsRef = ref(db, "chats/" + currentUser!.uid + "/");
+    const chats = await get(chatsRef);
+    let counter = 0;
+    chats.forEach((chat) => {
+      if (!chat.val().wasRed) {
+        counter++;
+      }
+    });
+    setMessagesCounter(counter);
+  }
+
+  useEffect(() => {
+    watchMessagesCounter();
+    return () => {
+      off(ref(db, "chats/" + currentUser!.uid + "/"));
+    };
+  }, []);
+
   return (
     <div className="header container">
       <NavLink to="/">
@@ -106,7 +152,11 @@ export default function Header() {
                 id="a7ImCHT3G9"
               ></path>
             </defs>
-            <g className="icon__outer-group">
+            <g
+              className={`icon__outer-group ${
+                messagesCounter ? "messages-icon__outer-group" : ""
+              }`}
+            >
               <use
                 xlinkHref="#d2CNLACt9S"
                 opacity="1"
@@ -114,7 +164,11 @@ export default function Header() {
                 fillOpacity="1"
               ></use>
             </g>
-            <g className="icon__inner-group">
+            <g
+              className={`icon__inner-group ${
+                messagesCounter ? "messages-icon__inner-group" : ""
+              }`}
+            >
               <use
                 xlinkHref="#a7ImCHT3G9"
                 opacity="1"
@@ -123,6 +177,9 @@ export default function Header() {
               ></use>
             </g>
           </svg>
+          {messagesCounter ? (
+            <span className="messages-icon__counter">{messagesCounter}</span>
+          ) : null}
         </NavLink>
       </div>
     </div>

@@ -18,6 +18,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import TextareaAutosize from "react-textarea-autosize";
 import { convertCompilerOptionsFromJson } from "typescript";
+import { PROFILE_TEXT_PLACEHOLDER } from "../consts";
 export interface PostProps {
   userName: string;
   createdAt: string;
@@ -307,7 +308,9 @@ export default function Post({
           <div className="post__header">
             <div className="post__info">
               <Avatar src={photoUrl} parent="post"></Avatar>
-              <p className="post__author-name">{userName}</p>
+              <p className="post__author-name">
+                {userName ? userName : PROFILE_TEXT_PLACEHOLDER}
+              </p>
               <p className="post__created-at">{formateDate(createdAt)}</p>
             </div>
             {isMine ? (

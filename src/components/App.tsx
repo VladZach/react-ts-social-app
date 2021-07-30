@@ -81,57 +81,59 @@ function App() {
   return (
     <>
       <Router>
-        <Header></Header>
         <AuthProvider>
-          <Switch>
-            <PrivateRoute
-              exact
-              path="/"
-              key="current-user"
-              component={UserPage}
-            ></PrivateRoute>
-            <UnathorizedRoute
-              path="/start-screen"
-              component={startScreen}
-            ></UnathorizedRoute>
-            <UnathorizedRoute
-              path="/signup"
-              component={signUp}
-            ></UnathorizedRoute>
-            <UnathorizedRoute
-              path="/login"
-              component={login}
-            ></UnathorizedRoute>
+          <>
+            <Header></Header>
+            <Switch>
+              <PrivateRoute
+                exact
+                path="/"
+                key="current-user"
+                component={UserPage}
+              ></PrivateRoute>
+              <UnathorizedRoute
+                path="/start-screen"
+                component={startScreen}
+              ></UnathorizedRoute>
+              <UnathorizedRoute
+                path="/signup"
+                component={signUp}
+              ></UnathorizedRoute>
+              <UnathorizedRoute
+                path="/login"
+                component={login}
+              ></UnathorizedRoute>
 
-            <PrivateRoute
-              path="/reauthenticate"
-              component={reauthenticate}
-            ></PrivateRoute>
-            <UnathorizedRoute
-              path="/reset-password"
-              component={resetPassword}
-            ></UnathorizedRoute>
-            <PrivateRoute
-              path="/update-profile"
-              component={updateProfile}
-            ></PrivateRoute>
-            <PrivateRoute path="/news" component={News}></PrivateRoute>
-            <PrivateRoute path="/chats" component={Chats}></PrivateRoute>
-            <PrivateRoute
-              path="/search-people"
-              component={SearchPeople}
-            ></PrivateRoute>
+              <PrivateRoute
+                path="/reauthenticate"
+                component={reauthenticate}
+              ></PrivateRoute>
+              <UnathorizedRoute
+                path="/reset-password"
+                component={resetPassword}
+              ></UnathorizedRoute>
+              <PrivateRoute
+                path="/update-profile"
+                component={updateProfile}
+              ></PrivateRoute>
+              <PrivateRoute path="/news" component={News}></PrivateRoute>
+              <PrivateRoute path="/chats" component={Chats}></PrivateRoute>
+              <PrivateRoute
+                path="/search-people"
+                component={SearchPeople}
+              ></PrivateRoute>
 
-            <PrivateRoute
-              path="/chat/:interlocutorId"
-              component={Chat}
-            ></PrivateRoute>
-            <PrivateRoute
-              path="/:id"
-              key="other-user"
-              component={UserPage}
-            ></PrivateRoute>
-          </Switch>
+              <PrivateRoute
+                path="/chat/:interlocutorId"
+                component={Chat}
+              ></PrivateRoute>
+              <PrivateRoute
+                path="/:id"
+                key="other-user"
+                component={UserPage}
+              ></PrivateRoute>
+            </Switch>
+          </>
         </AuthProvider>
       </Router>
     </>

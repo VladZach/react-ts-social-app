@@ -15,8 +15,10 @@ export default function Avatar({ parent, src, className }: AvatarProps) {
     >
       <div className={`${parent}__avatar-border avatar-border`}></div>
       <img
-        className={`${parent}__avatar avatar`}
-        src={src || "../avatar.jpg"}
+        className={`${parent}__avatar avatar ${
+          src ? "" : `${parent}__avatar_default`
+        }`}
+        src={src || "../avatar.png"}
       ></img>
     </div>
   );

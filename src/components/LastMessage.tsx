@@ -38,7 +38,7 @@ export default function LastMessage({
               <div className="last-message__avatar-border post__avatar-border avatar-border"></div>
               <img
                 className="last-message__avatar post__avatar avatar"
-                src={userData?.photoUrl ? userData.photoUrl : "../avatar.jpg"}
+                src={userData?.photoUrl ? userData.photoUrl : "../avatar.png"}
               ></img>
             </div>
             <p className="last-message__author-name post__author-name">

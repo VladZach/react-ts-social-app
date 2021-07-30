@@ -15,6 +15,7 @@ import { formateDate } from "./Post";
 import { UserData, getUserData } from "./UserProfile";
 import TextareaAutosize from "react-textarea-autosize";
 import Avatar from "./Avatar";
+import { PROFILE_TEXT_PLACEHOLDER } from "../consts";
 
 export interface CommentProps {
   text: string;
@@ -130,9 +131,13 @@ export default function Comment({
   }, []);
 
   useEffect(() => {
+    let isSubscribed = true;
     if (userData) {
       setIsLoading(false);
     }
+    return () => {
+      isSubscribed = false;
+    };
   }, [userData]);
 
   const editForm = (
@@ -186,7 +191,11 @@ export default function Comment({
           <div className="comment__header">
             <div className="comment__info">
               <Avatar src={userData!.photoUrl} parent="comment"></Avatar>
-              <p className="comment__author-name">{userData!.fullName}</p>
+              <p className="comment__author-name">
+                {userData!.fullName
+                  ? userData!.fullName
+                  : PROFILE_TEXT_PLACEHOLDER}
+              </p>
               <p className="comment__created-at">{formateDate(createdAt)}</p>
             </div>
             {isMine ? (

@@ -47,6 +47,7 @@ export default function Chat() {
     useState<SelectedMessageProps | null>(null);
   const [messages, setMessages] = useState<MessageObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [chat, setChat] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { interlocutorId } = useParams<any>();
@@ -69,6 +70,12 @@ export default function Chat() {
     return update(messageRef, { text: text });
   }
 
+  async function watchChats() {
+    const chatRef = ref(db, "chats/" + currentUser!.uid + "/" + path);
+    onValue(chatRef, (chat) => {
+      setChat(chat.val());
+    });
+  }
   async function setChatsForUsers(message: MessageObject) {
     const currentUserChatRef = ref(
       db,
@@ -78,8 +85,16 @@ export default function Chat() {
       db,
       "chats/" + interlocutorId! + "/" + path
     );
-    const message1 = { ...message, interlocutorId: currentUser!.uid };
-    const message2 = { ...message, interlocutorId: interlocutorId };
+    const message1 = {
+      ...message,
+      interlocutorId: currentUser!.uid,
+      wasRed: false,
+    };
+    const message2 = {
+      ...message,
+      interlocutorId: interlocutorId,
+      wasRed: false,
+    };
     await set(currentUserChatRef, message2);
     await set(interlocutorChatRef, message1);
   }
@@ -95,9 +110,17 @@ export default function Chat() {
     setIsEditing(false);
   }
 
-  function getMessages() {
-    const postsRef = ref(db, "messages/" + path);
-    onValue(postsRef, (snapshot) => {
+  async function readMessage() {
+    const currentUserChatRef = ref(
+      db,
+      "chats/" + currentUser!.uid + "/" + path
+    );
+    await update(currentUserChatRef, { wasRed: true });
+  }
+
+  async function getMessages() {
+    const messagesRef = ref(db, "messages/" + path);
+    onValue(messagesRef, (snapshot) => {
       const messages: MessageObject[] = [];
       let previousAuthor = "";
       let messagesCounter = 0;
@@ -143,6 +166,11 @@ export default function Chat() {
   }
 
   useEffect(() => {
+    readMessage();
+    console.log("messages changed");
+  }, [messages, chat]);
+
+  useEffect(() => {
     getUserData(interlocutorId).then((snapshot) =>
       setInterlocutorData(snapshot.val())
     );
@@ -150,6 +178,7 @@ export default function Chat() {
       setCurrentUserData(snapshot.val())
     );
     getMessages();
+    watchChats();
     return () => {
       off(ref(db, "chat/" + path));
     };
@@ -272,6 +301,7 @@ export default function Chat() {
                   <Message
                     id={item.id!}
                     text={item.text}
+                    key={item.createdAt as string}
                     isMine={item.authorId === currentUser!.uid}
                     hasScionOnTop={item.hasScionOnTop}
                     hasScionOnBottom={item.hasScionOnBottom}

@@ -10,6 +10,7 @@ import {
 } from "firebase/database";
 import React, { useState, useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
+import { PROFILE_TEXT_PLACEHOLDER } from "../consts";
 import { useAuth } from "../contexts/AuthContext";
 
 export interface UserDataWithId extends UserData {
@@ -41,8 +42,6 @@ export default function UserProfile({
   const [isSubscribed, setIsSubscribed] = useState(false);
   const db = getDatabase();
   const history = useHistory();
-
-  let placeholder = "????????????";
 
   async function subscribe() {
     const subscriptionRef = ref(
@@ -111,13 +110,15 @@ export default function UserProfile({
   return (
     <div className="user-profile">
       <img
-        src={photoUrl ? photoUrl : "./avatar.jpg"}
-        className="user-avatar user-profile__avatar stone-bordered"
+        src={photoUrl ? photoUrl : "./avatar.png"}
+        className={`user-avatar user-profile__avatar stone-bordered ${
+          photoUrl ? "" : "user-profile__avatar_default"
+        }`}
       ></img>
       <div className="user-info user-profile__info stone-bordered">
         <div className="user-info__header">
           <h3 className="user-name user-info__name">
-            {fullName ? fullName : placeholder}
+            {fullName ? fullName : PROFILE_TEXT_PLACEHOLDER}
           </h3>
           {isMine ? (
             <div className="user-profile__controls controls">
@@ -172,13 +173,13 @@ export default function UserProfile({
         <div className="user-text user-info__text">
           <span className="user-text__header">from:</span>
           <span className="user-text__text">
-            {whereFrom ? whereFrom : placeholder}
+            {whereFrom ? whereFrom : PROFILE_TEXT_PLACEHOLDER}
           </span>
         </div>
         <div className="user-text user-info__text">
           <span className="user-text__header">about me:</span>
           <span className="user-text__text">
-            {aboutMe ? aboutMe : placeholder}
+            {aboutMe ? aboutMe : PROFILE_TEXT_PLACEHOLDER}
           </span>
         </div>
       </div>
