@@ -168,7 +168,7 @@ export default function Chat() {
   useEffect(() => {
     readMessage();
     console.log("messages changed");
-  }, [messages, chat]);
+  }, [chat]);
 
   useEffect(() => {
     getUserData(interlocutorId).then((snapshot) =>
