@@ -61,6 +61,7 @@ export default function Post({
   //загрузка усложняет и без того сложную логику рендера
   const { currentUser } = useAuth();
   const [comments, setComments] = useState<CommentProps[]>([]);
+  const [commentsAmount, setCommentsAmount] = useState(0);
   const [likesAmount, setLikesAmount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   //из-за структуры базы данных, приходится следить за обновлениями поста отдельно
@@ -69,6 +70,7 @@ export default function Post({
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCommenting, setIsCommenting] = useState(false);
+  const [allCommentsShown, setAllCommentsShown] = useState(false);
 
   const db = getDatabase();
   const isMine = currentUser!.uid == authorId;
@@ -111,6 +113,7 @@ export default function Post({
         comments.push(comment);
       });
       setComments(comments);
+      setCommentsAmount(snapshot.size);
     });
   }
 
@@ -369,6 +372,7 @@ export default function Post({
                       ></use>
                     </g>
                   </svg>
+                  {commentsAmount > 0 ? commentsAmount : null}
                 </div>
                 <div className="post__icon-container">
                   <svg
@@ -415,16 +419,33 @@ export default function Post({
             </>
           )}
           <div className="comments">
-            {comments.map((item, index) => (
-              <Comment
-                commentId={item.commentId}
-                postId={item.postId}
-                authorId={item.authorId}
-                text={item.text}
-                createdAt={item.createdAt}
-                key={item.createdAt + index}
-              ></Comment>
-            ))}
+            {comments.map((item, index) => {
+              if (index >= 2 && !allCommentsShown) {
+                return null;
+              }
+              return (
+                <Comment
+                  commentId={item.commentId}
+                  postId={item.postId}
+                  authorId={item.authorId}
+                  text={item.text}
+                  createdAt={item.createdAt}
+                  key={item.createdAt + index}
+                ></Comment>
+              );
+            })}
+            {commentsAmount > 2 ? (
+              <div className="comment__footer">
+                <div
+                  className="comments__all-comments-button"
+                  onClick={() => {
+                    setAllCommentsShown((prevState) => !prevState);
+                  }}
+                >
+                  {allCommentsShown ? "Hide comments" : "Show all comments"}
+                </div>
+              </div>
+            ) : null}
           </div>
         </>
       )}

@@ -1112,6 +1112,17 @@ textarea::-webkit-scrollbar-thumb {
   bottom: 0;
 }
 
+.comment__footer {
+  display: flex;
+  justify-content: center;
+}
+
+.comments__all-comments-button:hover {
+  cursor: pointer;
+  background-color: white;
+  color: black;
+}
+
 /** --------icon----------- **/
 
 .icon__outer-group use {
