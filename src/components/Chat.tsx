@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Formik, Form, Field } from "formik";
@@ -12,12 +12,15 @@ import {
   serverTimestamp,
   onValue,
   off,
+  get,
 } from "@firebase/database";
 import Avatar from "./Avatar";
 import Message from "./Message";
 import Loader from "./Loader";
 import { UserData } from "./UserProfile";
 import { getUserData } from "./UserProfile";
+import { limitToLast, query } from "firebase/database";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 export interface SelectedMessageProps {
   id: string;
@@ -47,15 +50,27 @@ export default function Chat() {
     useState<SelectedMessageProps | null>(null);
   const [messages, setMessages] = useState<MessageObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const messagesPerScroll = 20;
+  const [messagesToShow, setMessagesToShow] = useState(messagesPerScroll);
+  const [totalMessagesAmount, setTotalMessagesAmount] = useState(0);
   const [chat, setChat] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
   const { interlocutorId } = useParams<any>();
   const { currentUser } = useAuth();
 
   const db = getDatabase();
   const path = getRefPathByUsersNames(currentUser!.uid, interlocutorId);
 
+  // const messagesWindowRef = useCallback(
+  //   (window) => {
+  //     if (window) {
+  //       window.scrollTop = window.scrollHeight;
+  //     }
+  //   },
+  //   [messages]
+  // );
   const controlsRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   const formRef = useRef() as React.MutableRefObject<HTMLFormElement>;
 
@@ -120,43 +135,56 @@ export default function Chat() {
 
   async function getMessages() {
     const messagesRef = ref(db, "messages/" + path);
-    onValue(messagesRef, (snapshot) => {
-      const messages: MessageObject[] = [];
-      let previousAuthor = "";
-      let messagesCounter = 0;
-      snapshot.forEach((childSnapshot) => {
-        const message = childSnapshot.val();
-        message.id = childSnapshot.key;
-        //если предыдущее сообщение от другого автора
-        if (message.authorId !== previousAuthor) {
-          //и текущее сообщение - от собеседника
-          if (interlocutorId == message.authorId) {
-            //делаем сообщению "отросток" вверх
-            message.hasScionOnTop = true;
+    const limitedMessagesRef = query(messagesRef, limitToLast(messagesToShow));
+    onValue(
+      limitedMessagesRef,
+      (snapshot) => {
+        console.log(snapshot.val());
+        const messages: MessageObject[] = [];
+        let previousAuthor = "";
+        let messagesCounter = 0;
+        snapshot.forEach((childSnapshot) => {
+          const message = childSnapshot.val();
+          message.id = childSnapshot.key;
+          //если предыдущее сообщение от другого автора
+          if (message.authorId !== previousAuthor) {
+            //и текущее сообщение - от собеседника
+            if (interlocutorId == message.authorId) {
+              //делаем сообщению "отросток" вверх
+              message.hasScionOnTop = true;
+            }
+            //если же прошлое сообщение от другого автора
+            //и текущее сообщение от текущего пользователя
+            if (currentUser!.uid == message.authorId) {
+              //делаем "отросток" вниз
+              message.hasScionOnBottom = true;
+            }
+            previousAuthor = message.authorId;
+          } else {
+            //если предыдущее сообщение от того же автора
+            //и этот автор - текущий юзер
+            if (message.authorId === currentUser!.uid) {
+              //убираем "отросток" у предыдущего сообщения, и делаем у этого
+              messages[messagesCounter - 1].hasScionOnBottom = false;
+              message.hasScionOnBottom = true;
+            }
           }
-          //если же прошлое сообщение от другого автора
-          //и текущее сообщение от текущего пользователя
-          if (currentUser!.uid == message.authorId) {
-            //делаем "отросток" вниз
-            message.hasScionOnBottom = true;
-          }
-          previousAuthor = message.authorId;
-        } else {
-          //если предыдущее сообщение от того же автора
-          //и этот автор - текущий юзер
-          if (message.authorId === currentUser!.uid) {
-            //убираем "отросток" у предыдущего сообщения, и делаем у этого
-            messages[messagesCounter - 1].hasScionOnBottom = false;
-            message.hasScionOnBottom = true;
-          }
-        }
-        messagesCounter++;
-        messages.push(message);
-      });
-      setMessages(messages);
-    });
+          messagesCounter++;
+          messages.push(message);
+        });
+        setMessagesToShow((prev) => prev + messagesPerScroll);
+        console.log(messagesToShow);
+        setMessages(messages.reverse());
+      },
+      { onlyOnce: true }
+    );
   }
 
+  async function getTotalMessagesAmount() {
+    const messagesRef = ref(db, "messages/" + path);
+    const messages = await get(messagesRef);
+    setTotalMessagesAmount(messages.size);
+  }
   function toggleEditing() {
     setIsEditing((isEditing) => !isEditing);
   }
@@ -164,10 +192,12 @@ export default function Chat() {
   function toggleDeleting() {
     setIsDeleting((isDeleting) => !isDeleting);
   }
-
+  useEffect(() => {
+    getTotalMessagesAmount();
+    console.log(totalMessagesAmount);
+  }, []);
   useEffect(() => {
     readMessage();
-    console.log("messages changed");
   }, [chat]);
 
   useEffect(() => {
@@ -295,9 +325,32 @@ export default function Chat() {
               </div>
             ) : null}
           </div>
-          <div className="messages">
-            {messages.length
-              ? messages.map((item) => (
+          <div
+            id="scrollableDiv"
+            className="messages"
+            style={{
+              height: 300,
+              overflow: "auto",
+              display: "flex",
+              flexDirection: "column-reverse",
+            }}
+          >
+            {messages.length ? (
+              <InfiniteScroll
+                style={{
+                  display: "flex",
+                  flexDirection: "column-reverse",
+                  width: "100%",
+                  overflow: "inherit",
+                }}
+                next={getMessages}
+                inverse={true}
+                hasMore={totalMessagesAmount > messages.length}
+                loader={<Loader></Loader>}
+                dataLength={messages.length}
+                scrollableTarget="scrollableDiv"
+              >
+                {messages.map((item) => (
                   <Message
                     id={item.id!}
                     text={item.text}
@@ -310,8 +363,11 @@ export default function Chat() {
                     formRef={formRef}
                     resetControls={resetControls}
                   ></Message>
-                ))
-              : "there is nothing yet"}
+                ))}
+              </InfiniteScroll>
+            ) : (
+              "there is nothing yet"
+            )}
           </div>
           <div className="chat__footer">
             {isEditing ? editForm : sendForm}

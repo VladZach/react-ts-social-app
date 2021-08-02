@@ -689,11 +689,14 @@ a:visited {
   right: 0;
 }
 
-.messages {
+.messages__scroll {
   display: flex;
   flex-direction: column;
-  padding-bottom: 25px;
   overflow-y: scroll;
+}
+
+.messages {
+  padding-bottom: 25px;
   padding-top: 20px;
   grid-area: chat;
   padding-right: 90px;
