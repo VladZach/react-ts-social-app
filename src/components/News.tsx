@@ -1,4 +1,11 @@
-import { get, getDatabase, ref, query, limitToLast } from "firebase/database";
+import {
+  get,
+  getDatabase,
+  ref,
+  query,
+  limitToLast,
+  onValue,
+} from "firebase/database";
 import React, { useState } from "react";
 import Loader from "./Loader";
 import { useEffect } from "react";
@@ -50,14 +57,13 @@ export default function News() {
   }, [totalNewsAmount]);
 
   async function getNewsAmount() {
-    const subscriptionsRef = ref(db, "users/" + currentUser!.uid + "/news/");
-    const news = await get(subscriptionsRef);
-    return news.size;
+    const subscriptionsRef = ref(db, "counters/news/" + currentUser!.uid);
+    onValue(subscriptionsRef, (snapshot) => {
+      setTotalNewsAmount(snapshot.val());
+    });
   }
   useEffect(() => {
-    getNewsAmount().then((newsSize) => {
-      setTotalNewsAmount(newsSize);
-    });
+    getNewsAmount();
   }, []);
 
   return (

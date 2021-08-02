@@ -6,6 +6,7 @@ import {
   onValue,
   off,
   update,
+  increment,
   remove,
 } from "firebase/database";
 import React, { useState, useEffect } from "react";
@@ -52,11 +53,16 @@ export default function UserProfile({
       db,
       "users/" + userId + "/subscribers/" + currentUser!.uid
     );
+    const postsCounterRef = ref(db, "counters/posts/" + userId);
+    const newsCounterRef = ref(db, "counters/news/" + currentUser!.uid);
     const postsRef = ref(db, "users/" + userId + "/posts/");
     const newsRef = ref(db, "users/" + currentUser!.uid + "/news/");
     const postsSnapshot = await get(postsRef);
+    //на случай, если у юзера нет постов
     if (postsSnapshot.val()) {
       await update(newsRef, postsSnapshot.val());
+      const counter = await get(postsCounterRef);
+      await set(newsCounterRef, increment(counter.val()));
     }
     await set(subscriptionRef, true);
     await set(subscriberRef, true);
@@ -73,6 +79,8 @@ export default function UserProfile({
     );
     const postsRef = ref(db, "users/" + userId + "/posts/");
     const newsRef = ref(db, "users/" + currentUser!.uid + "/news/");
+    const postsCounterRef = ref(db, "counters/posts/" + userId);
+    const newsCounterRef = ref(db, "counters/news/" + currentUser!.uid);
     const postsSnapshot = await get(postsRef);
     const posts: any = {};
     if (postsSnapshot.val()) {
@@ -81,6 +89,8 @@ export default function UserProfile({
         posts[key!] = null;
       });
       await update(newsRef, posts);
+      const counter = await get(postsCounterRef);
+      set(newsCounterRef, increment(-counter.val()));
     }
     await remove(subscriptionRef);
     await remove(subscriberRef);

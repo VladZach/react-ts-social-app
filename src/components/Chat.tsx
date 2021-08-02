@@ -13,13 +13,14 @@ import {
   onValue,
   off,
   get,
+  increment,
 } from "@firebase/database";
 import Avatar from "./Avatar";
 import Message from "./Message";
 import Loader from "./Loader";
 import { UserData } from "./UserProfile";
 import { getUserData } from "./UserProfile";
-import { limitToLast, query } from "firebase/database";
+import { DataSnapshot, limitToLast, query } from "firebase/database";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 export interface SelectedMessageProps {
@@ -74,9 +75,11 @@ export default function Chat() {
   const controlsRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   const formRef = useRef() as React.MutableRefObject<HTMLFormElement>;
 
-  function writeMessage(message: MessageObject) {
+  async function writeMessage(message: MessageObject) {
     const messageListRef = ref(db, "messages/" + path);
+    const messagesCounterRef = ref(db, "counters/messages/" + path);
     const newMessageRef = push(messageListRef);
+    await set(messagesCounterRef, increment(1));
     return set(newMessageRef, message);
   }
 
@@ -116,7 +119,10 @@ export default function Chat() {
 
   async function deleteMessage(messageId: string) {
     const messageRef = ref(db, "messages/" + path + "/" + messageId);
+    const counterRef = ref(db, "counters/messages/" + path);
+
     await remove(messageRef);
+    set(counterRef, increment(-1));
     setSelectedMessage(null);
   }
 
@@ -133,57 +139,76 @@ export default function Chat() {
     await update(currentUserChatRef, { wasRed: true });
   }
 
+  function addScionsToMessages(messagesSnapshot: DataSnapshot) {
+    const messages: MessageObject[] = [];
+    let previousAuthor = "";
+    let messagesCounter = 0;
+    messagesSnapshot.forEach((childSnapshot) => {
+      const message = childSnapshot.val();
+      message.id = childSnapshot.key;
+      //если предыдущее сообщение от другого автора
+      if (message.authorId !== previousAuthor) {
+        //и текущее сообщение - от собеседника
+        if (interlocutorId == message.authorId) {
+          //делаем сообщению "отросток" вверх
+          message.hasScionOnTop = true;
+        }
+        //если же прошлое сообщение от другого автора
+        //и текущее сообщение от текущего пользователя
+        if (currentUser!.uid == message.authorId) {
+          //делаем "отросток" вниз
+          message.hasScionOnBottom = true;
+        }
+        previousAuthor = message.authorId;
+      } else {
+        //если предыдущее сообщение от того же автора
+        //и этот автор - текущий юзер
+        if (message.authorId === currentUser!.uid) {
+          //убираем "отросток" у предыдущего сообщения, и делаем у этого
+          messages[messagesCounter - 1].hasScionOnBottom = false;
+          message.hasScionOnBottom = true;
+        }
+      }
+      messagesCounter++;
+      messages.push(message);
+    });
+    return messages;
+  }
+
   async function getMessages() {
     const messagesRef = ref(db, "messages/" + path);
-    const limitedMessagesRef = query(messagesRef, limitToLast(messagesToShow));
+    const limitedMessagesRef = query(
+      messagesRef,
+      limitToLast(messagesToShow + messagesPerScroll)
+    );
+
     onValue(
       limitedMessagesRef,
       (snapshot) => {
-        console.log(snapshot.val());
-        const messages: MessageObject[] = [];
-        let previousAuthor = "";
-        let messagesCounter = 0;
-        snapshot.forEach((childSnapshot) => {
-          const message = childSnapshot.val();
-          message.id = childSnapshot.key;
-          //если предыдущее сообщение от другого автора
-          if (message.authorId !== previousAuthor) {
-            //и текущее сообщение - от собеседника
-            if (interlocutorId == message.authorId) {
-              //делаем сообщению "отросток" вверх
-              message.hasScionOnTop = true;
-            }
-            //если же прошлое сообщение от другого автора
-            //и текущее сообщение от текущего пользователя
-            if (currentUser!.uid == message.authorId) {
-              //делаем "отросток" вниз
-              message.hasScionOnBottom = true;
-            }
-            previousAuthor = message.authorId;
-          } else {
-            //если предыдущее сообщение от того же автора
-            //и этот автор - текущий юзер
-            if (message.authorId === currentUser!.uid) {
-              //убираем "отросток" у предыдущего сообщения, и делаем у этого
-              messages[messagesCounter - 1].hasScionOnBottom = false;
-              message.hasScionOnBottom = true;
-            }
-          }
-          messagesCounter++;
-          messages.push(message);
-        });
+        const messages = addScionsToMessages(snapshot);
+
         setMessagesToShow((prev) => prev + messagesPerScroll);
-        console.log(messagesToShow);
+
         setMessages(messages.reverse());
       },
       { onlyOnce: true }
     );
   }
 
-  async function getTotalMessagesAmount() {
+  async function watchMessages() {
     const messagesRef = ref(db, "messages/" + path);
-    const messages = await get(messagesRef);
-    setTotalMessagesAmount(messages.size);
+    const limitedMessagesRef = query(messagesRef, limitToLast(messagesToShow));
+    onValue(limitedMessagesRef, (snapshot) => {
+      const messages = addScionsToMessages(snapshot);
+      setMessages(messages.reverse());
+    });
+  }
+
+  async function getTotalMessagesAmount() {
+    const counterRef = ref(db, "counters/messages/" + path);
+    onValue(counterRef, (snapshot) => {
+      setTotalMessagesAmount(snapshot.val());
+    });
   }
   function toggleEditing() {
     setIsEditing((isEditing) => !isEditing);
@@ -207,7 +232,7 @@ export default function Chat() {
     getUserData(currentUser!.uid).then((snapshot) =>
       setCurrentUserData(snapshot.val())
     );
-    getMessages();
+    watchMessages();
     watchChats();
     return () => {
       off(ref(db, "chat/" + path));
@@ -286,7 +311,7 @@ export default function Chat() {
               {interlocutorData!.fullName}
             </div>
             {selectedMessage ? (
-              <div className="chat__controls controls" ref={controlsRef}>
+              <div className="chat__controls" ref={controlsRef}>
                 {isDeleting ? (
                   <div className="post-deletion">
                     <div className="post-deletion__header">

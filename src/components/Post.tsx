@@ -14,6 +14,7 @@ import {
   push,
   serverTimestamp,
   get,
+  increment,
 } from "firebase/database";
 import { useAuth } from "../contexts/AuthContext";
 import TextareaAutosize from "react-textarea-autosize";
@@ -165,9 +166,11 @@ export default function Post({
       db,
       "users/" + currentUser!.uid + "subscribers/"
     );
+    const postsCounterRef = ref(db, "counters/posts/" + currentUser!.uid);
     //если оставить кнопки, другой юзер сможет удалить комменты и лайки от поста
     remove(postRef)
       .then(() => remove(userPostRef))
+      .then(() => set(postsCounterRef, increment(-1)))
       .then(() => {
         return get(subscribersRef).then((snapshot) => {
           const promises: Promise<void>[] = [];
@@ -176,7 +179,10 @@ export default function Post({
               db,
               "users/" + subscriber.key + "/news/" + postId
             );
+
+            const newsCounterRef = ref(db, "counters/news/" + subscriber.key);
             promises.push(remove(newRef));
+            promises.push(set(newsCounterRef, increment(-1)));
           });
           return Promise.all(promises);
         });

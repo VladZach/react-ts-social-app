@@ -28,18 +28,14 @@ export default function SearchPeople() {
   );
 
   const { currentUser } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
-  function getUsers() {
-    const db = getDatabase();
-    const usersRef = ref(db, "users");
-    const firstTenUsersRef = query(usersRef, limitToFirst(10));
-    return get(firstTenUsersRef).then((snapshot) => {
-      setUsersData(snapshot.val());
-    });
-  }
 
   async function searchUsers(e: ChangeEvent<HTMLInputElement>) {
     const queryText = e.target.value.trim().toLowerCase();
+    if (!queryText) {
+      console.log(3);
+      setUsersData(null);
+      return;
+    }
     const db = getDatabase();
     const usersRef = ref(db, "users/");
     const searchedByName = query(
@@ -53,19 +49,12 @@ export default function SearchPeople() {
   }
 
   useEffect(() => {
-    getUsers()
-      .catch((e) => console.log(e))
-      .finally(() => {});
-  }, []);
-
-  useEffect(() => {
     if (usersData) {
       const list = [];
       for (const [key, values] of Object.entries(usersData)) {
         if (key === currentUser!.uid) {
           continue;
         }
-        console.log(key, currentUser!.uid);
         let profile = (
           <Link className="search__link" key={key} to={"/" + key}>
             <UserProfile key={key} userId={key} {...values}></UserProfile>
@@ -74,7 +63,6 @@ export default function SearchPeople() {
         list.push(profile);
       }
       setUsersElementsList(list);
-      setIsLoading(false);
     }
   }, [usersData]);
 
@@ -89,13 +77,9 @@ export default function SearchPeople() {
           ></input>
           <span>search</span>
         </div>
-        {isLoading ? (
-          <Loader></Loader>
-        ) : (
-          usersElementsList.map((item) => {
-            return item;
-          })
-        )}
+        {usersElementsList.map((item) => {
+          return item;
+        })}
       </div>
     </div>
   );

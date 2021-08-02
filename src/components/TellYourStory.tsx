@@ -7,6 +7,7 @@ import {
   serverTimestamp,
   push,
   get,
+  increment,
 } from "firebase/database";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -41,10 +42,12 @@ export default function TellYourStory() {
       createdAt: serverTimestamp(),
       authorId: currentUser!.uid,
     });
+    const postsCounterRef = ref(db, "counters/posts/" + currentUser!.uid);
 
     const key = newPostRef.key;
     const userPostRef = ref(db, "users/" + currentUser!.uid + "/posts/" + key);
     await set(userPostRef, true);
+    await set(postsCounterRef, increment(1));
     await get(subscribersListRef).then((snapshot) => {
       const promises: Promise<void>[] = [];
       snapshot.forEach((subscriber) => {
@@ -52,6 +55,8 @@ export default function TellYourStory() {
           db,
           "users/" + subscriber.key + "/news/" + key
         );
+        const newsCounterRef = ref(db, "counters/news/" + subscriber.key);
+        promises.push(set(newsCounterRef, increment(1)));
         promises.push(set(subscriberNewRef, true));
       });
       return Promise.all(promises);
