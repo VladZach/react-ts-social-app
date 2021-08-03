@@ -164,13 +164,13 @@ export default function Post({
     const postCommentsRef = ref(db, "comments/" + postId);
     const subscribersRef = ref(
       db,
-      "users/" + currentUser!.uid + "subscribers/"
+      "users/" + currentUser!.uid + "/subscribers/"
     );
     const postsCounterRef = ref(db, "counters/posts/" + currentUser!.uid);
     //если оставить кнопки, другой юзер сможет удалить комменты и лайки от поста
     remove(postRef)
-      .then(() => remove(userPostRef))
       .then(() => set(postsCounterRef, increment(-1)))
+      .then(() => remove(userPostRef))
       .then(() => {
         return get(subscribersRef).then((snapshot) => {
           const promises: Promise<void>[] = [];
