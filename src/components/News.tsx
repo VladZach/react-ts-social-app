@@ -18,16 +18,18 @@ export default function News() {
   const [news, setNews] = useState<PostProps[]>([]);
   const newsPerScroll = 10;
   const db = getDatabase();
-  const [scrollPosition, setScrollPosition] = useState(newsPerScroll);
+  const [amountOfNewsToShow, setAmountOfNewsToShow] = useState(newsPerScroll);
   const { currentUser } = useAuth();
   const [totalNewsAmount, setTotalNewsAmount] = useState(0);
 
-  async function getNews() {
-    //чтобы избежать срабатывания при инициализации (следовательно, поднятия счётчика)
-    if (!totalNewsAmount) return;
-
+  async function getNews(isCalledByNext: boolean) {
+    let amount = amountOfNewsToShow;
+    //чтобы избежать увеличения счётчика при рендерах, вызванных не next() скролла
+    if (isCalledByNext) {
+      amount += newsPerScroll;
+    }
     const subscriptionsRef = ref(db, "users/" + currentUser!.uid + "/news/");
-    const newsRef = query(subscriptionsRef, limitToLast(scrollPosition));
+    const newsRef = query(subscriptionsRef, limitToLast(amount));
     const news = await get(newsRef);
     const newsArr: PostProps[] = [];
     const promises: Promise<void>[] = [];
@@ -47,13 +49,12 @@ export default function News() {
       );
     });
     await Promise.all(promises);
-
+    setAmountOfNewsToShow(amount);
     setNews(newsArr.reverse());
-    setScrollPosition((prev) => prev + newsPerScroll);
   }
 
   useEffect(() => {
-    getNews();
+    getNews(false);
   }, [totalNewsAmount]);
 
   async function getNewsAmount() {
@@ -70,7 +71,7 @@ export default function News() {
     <div className="page page_centralized container">
       <div className="wall bordered-container">
         <InfiniteScroll
-          next={getNews}
+          next={getNews.bind(null, true)}
           hasMore={totalNewsAmount > news.length}
           loader={<Loader></Loader>}
           dataLength={news.length}
