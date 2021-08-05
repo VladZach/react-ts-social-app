@@ -51,7 +51,7 @@ export function formateDate(dateString: string) {
   }`;
 }
 
-export default function Post({
+const Post = React.memo(function Post({
   userName,
   createdAt,
   postId,
@@ -459,4 +459,6 @@ export default function Post({
       {isCommenting ? commentForm : null}
     </div>
   );
-}
+});
+
+export default Post;
