@@ -50,14 +50,17 @@ export default function Comment({
     }
   }
 
-  function deleteComment() {
+  async function deleteComment() {
     const commentRef = ref(db, "comments/" + postId + "/" + commentId);
     const commentLikesRef = ref(db, "likes/comments/" + commentId);
     //если оставить кнопки, другой юзер сможет удалить комменты и лайки от поста
-    remove(commentRef)
-      .then(() => remove(commentRef))
-      .then(() => remove(commentLikesRef))
-      .catch((e) => console.log(e));
+    try {
+      await remove(commentRef);
+      await remove(commentRef);
+      await remove(commentLikesRef);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   function watchLike() {
