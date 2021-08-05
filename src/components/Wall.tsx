@@ -13,15 +13,17 @@ import {
 import { UserDataWithId } from "./UserProfile";
 import InfiniteScroll from "react-infinite-scroll-component";
 import Loader from "./Loader";
-import { debug } from "webpack";
 
 export default function Wall({ fullName, photoUrl, userId }: UserDataWithId) {
+  //храним все посты, полученые с помощью watchPosts
   const [posts, setPosts] = useState<PostProps[]>([]);
 
   const { currentUser } = useAuth();
   const isMine = currentUser!.uid === userId;
   const db = getDatabase();
   const postsPerScroll = 10;
+
+  //показываем только эту часть постов
   const [postsToShow, setPostsToShow] = useState<PostProps[]>([]);
   const [amountOfPostsToShow, setAmountOfPostsToShow] =
     useState(postsPerScroll);
@@ -29,7 +31,6 @@ export default function Wall({ fullName, photoUrl, userId }: UserDataWithId) {
   function watchPosts() {
     const postsRef = ref(db, "users/" + userId + "/posts/");
     onValue(postsRef, (snapshot) => {
-      console.log(3);
       let posts: PostProps[] = [];
       const promises: Promise<void | DataSnapshot>[] = [];
       snapshot.forEach((childSnapshot) => {
@@ -65,7 +66,6 @@ export default function Wall({ fullName, photoUrl, userId }: UserDataWithId) {
   }, []);
 
   useEffect(() => {
-    if (!posts.length) return;
     getPostsForScroll(false);
   }, [posts]);
 

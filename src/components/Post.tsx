@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Avatar from "./Avatar";
 import Comment from "./Comment";
 import { CommentProps } from "./Comment";
@@ -18,7 +18,6 @@ import {
 } from "firebase/database";
 import { useAuth } from "../contexts/AuthContext";
 import TextareaAutosize from "react-textarea-autosize";
-import { convertCompilerOptionsFromJson } from "typescript";
 import { PROFILE_TEXT_PLACEHOLDER } from "../consts";
 export interface PostProps {
   userName: string;
@@ -154,7 +153,7 @@ const Post = React.memo(function Post({
     }
   }
 
-  function deletePost(postId: string) {
+  async function deletePost(postId: string) {
     const postRef = ref(db, "posts/" + postId);
     const userPostRef = ref(
       db,
@@ -168,28 +167,29 @@ const Post = React.memo(function Post({
     );
     const postsCounterRef = ref(db, "counters/posts/" + currentUser!.uid);
     //если оставить кнопки, другой юзер сможет удалить комменты и лайки от поста
-    remove(postRef)
-      .then(() => set(postsCounterRef, increment(-1)))
-      .then(() => remove(userPostRef))
-      .then(() => {
-        return get(subscribersRef).then((snapshot) => {
-          const promises: Promise<void>[] = [];
-          snapshot.forEach((subscriber) => {
-            const newRef = ref(
-              db,
-              "users/" + subscriber.key + "/news/" + postId
-            );
+    //удаляем пост
+    await remove(postRef);
+    //декрементируем счётчик постов
+    await set(postsCounterRef, increment(-1));
+    //удаляем флаг поста у юзера
+    await remove(userPostRef);
+    //получаем всех подписчиков
+    const subscribers = await get(subscribersRef);
+    const promises: Promise<void>[] = [];
+    //для каждого из подписчиков удаляем флаг поста в новостях
+    // и декрементируем счётчик новостей
+    subscribers.forEach((subscriber) => {
+      const newRef = ref(db, "users/" + subscriber.key + "/news/" + postId);
 
-            const newsCounterRef = ref(db, "counters/news/" + subscriber.key);
-            promises.push(remove(newRef));
-            promises.push(set(newsCounterRef, increment(-1)));
-          });
-          return Promise.all(promises);
-        });
-      })
-      .then(() => remove(postCommentsRef))
-      .then(() => remove(postLikesRef))
-      .catch((e) => console.log(e));
+      const newsCounterRef = ref(db, "counters/news/" + subscriber.key);
+      promises.push(remove(newRef));
+      promises.push(set(newsCounterRef, increment(-1)));
+    });
+    await Promise.all(promises);
+    //удаляем комменты поста
+    await remove(postCommentsRef);
+    //удаляем лайки поста
+    await remove(postLikesRef);
   }
 
   function writeComment(text: string) {
