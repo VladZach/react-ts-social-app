@@ -91,6 +91,7 @@ export default function Chat() {
       setChat(snapshot.val());
     });
   }
+
   async function setChatsForUsers(message: MessageObject) {
     const currentUserChatRef = ref(
       db,
