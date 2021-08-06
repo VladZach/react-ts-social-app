@@ -205,10 +205,6 @@ export default function Chat() {
   }
 
   useEffect(() => {
-    getTotalMessagesAmount();
-  }, []);
-
-  useEffect(() => {
     readMessage();
   }, [chat]);
 
@@ -221,8 +217,10 @@ export default function Chat() {
     );
     watchMessages(false);
     watchChats();
+    getTotalMessagesAmount();
     return () => {
       off(ref(db, "chat/" + path));
+      off(ref(db, "messages/" + path));
     };
   }, []);
 
