@@ -13,19 +13,13 @@ import {
   onValue,
   off,
   increment,
-  endAt,
 } from "@firebase/database";
 import Avatar from "./Avatar";
 import Message from "./Message";
 import Loader from "./Loader";
 import { UserData } from "./UserProfile";
 import { getUserData } from "./UserProfile";
-import {
-  DataSnapshot,
-  limitToLast,
-  onChildChanged,
-  query,
-} from "firebase/database";
+import { DataSnapshot, limitToLast, query } from "firebase/database";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 export interface SelectedMessageProps {
@@ -81,9 +75,14 @@ export default function Chat() {
     return set(newMessageRef, message);
   }
 
-  function updateMessage(text: string, messageId: string) {
+  async function updateMessage(text: string, messageId: string) {
     const messageRef = ref(db, "messages/" + path + "/" + messageId);
-    return update(messageRef, { text: text });
+    await update(messageRef, { text: text });
+    if (messages[0].id === messageId) {
+      const updatedMessage = messages[0];
+      updatedMessage.text = text;
+      await setChatsForUsers(updatedMessage);
+    }
   }
 
   async function watchChats() {
@@ -118,7 +117,9 @@ export default function Chat() {
   async function deleteMessage(messageId: string) {
     const messageRef = ref(db, "messages/" + path + "/" + messageId);
     const counterRef = ref(db, "counters/messages/" + path);
-
+    if (messages[0].id === messageId) {
+      await setChatsForUsers(messages[1]);
+    }
     await remove(messageRef);
     set(counterRef, increment(-1));
     setSelectedMessage(null);
@@ -173,7 +174,7 @@ export default function Chat() {
     return messages;
   }
 
-  async function getMessages(isCalledByNext: boolean) {
+  function watchMessages(isCalledByNext: boolean) {
     off(ref(db, "messages/" + path));
     let amount = amountOfMessagesToShow;
     if (isCalledByNext) {
@@ -188,7 +189,7 @@ export default function Chat() {
     });
   }
 
-  async function getTotalMessagesAmount() {
+  function getTotalMessagesAmount() {
     const counterRef = ref(db, "counters/messages/" + path);
     onValue(counterRef, (snapshot) => {
       setTotalMessagesAmount(snapshot.val());
@@ -218,7 +219,7 @@ export default function Chat() {
     getUserData(currentUser!.uid).then((snapshot) =>
       setCurrentUserData(snapshot.val())
     );
-    getMessages(false);
+    watchMessages(false);
     watchChats();
     return () => {
       off(ref(db, "chat/" + path));
@@ -267,7 +268,6 @@ export default function Chat() {
           };
           await writeMessage(message);
           await setChatsForUsers(message);
-          getMessages(false);
         } catch (e) {
           console.log(e);
         }
@@ -355,7 +355,7 @@ export default function Chat() {
                   width: "100%",
                   overflow: "inherit",
                 }}
-                next={getMessages.bind(null, true)}
+                next={watchMessages.bind(null, true)}
                 inverse={true}
                 hasMore={totalMessagesAmount > messages.length}
                 loader={<Loader></Loader>}
