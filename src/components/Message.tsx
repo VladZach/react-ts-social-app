@@ -1,9 +1,9 @@
-import React, { useRef, useEffect, MouseEvent } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { SelectedMessageProps } from "./Chat";
+import { ref, onValue, getDatabase, off } from "firebase/database";
 
 interface MessageProps {
   id: string;
-  text: string;
   isMine: boolean;
   hasScionOnBottom?: boolean;
   hasScionOnTop?: boolean;
@@ -13,11 +13,11 @@ interface MessageProps {
   controlsRef: React.MutableRefObject<HTMLDivElement | undefined>;
   formRef: React.MutableRefObject<HTMLFormElement | undefined>;
   resetControls: () => void;
+  text: string;
 }
 
 export default function Message({
   id,
-  text,
   hasScionOnBottom,
   isMine,
   hasScionOnTop,
@@ -25,6 +25,7 @@ export default function Message({
   controlsRef,
   formRef,
   resetControls,
+  text,
 }: MessageProps) {
   const className = hasScionOnBottom
     ? "thought-bubble__body thought-bubble__body-right"
@@ -35,6 +36,7 @@ export default function Message({
     ? "message_from-me"
     : "message_from-interlocutor";
   const messageRef = useRef() as React.MutableRefObject<HTMLInputElement>;
+  //из-за infinite scroll-а, нужно следить за текстом внутри
 
   useEffect(() => {
     /**

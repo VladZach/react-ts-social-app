@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Formik, Form, Field } from "formik";
@@ -13,13 +13,19 @@ import {
   onValue,
   off,
   increment,
+  endAt,
 } from "@firebase/database";
 import Avatar from "./Avatar";
 import Message from "./Message";
 import Loader from "./Loader";
 import { UserData } from "./UserProfile";
 import { getUserData } from "./UserProfile";
-import { DataSnapshot, limitToLast, query } from "firebase/database";
+import {
+  DataSnapshot,
+  limitToLast,
+  onChildChanged,
+  query,
+} from "firebase/database";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 export interface SelectedMessageProps {
@@ -118,10 +124,10 @@ export default function Chat() {
     setSelectedMessage(null);
   }
 
-  function resetControls() {
+  const resetControls = useCallback(() => {
     setIsDeleting(false);
     setIsEditing(false);
-  }
+  }, []);
 
   async function readMessage() {
     const currentUserChatRef = ref(
@@ -168,21 +174,18 @@ export default function Chat() {
   }
 
   async function getMessages(isCalledByNext: boolean) {
+    off(ref(db, "messages/" + path));
     let amount = amountOfMessagesToShow;
     if (isCalledByNext) {
       amount += messagesPerScroll;
     }
     const messagesRef = ref(db, "messages/" + path);
     const limitedMessagesRef = query(messagesRef, limitToLast(amount));
-    onValue(
-      limitedMessagesRef,
-      (snapshot) => {
-        const messages = addScionsToMessages(snapshot);
-        setAmountOfMessagesToShow(amount);
-        setMessages(messages.reverse());
-      },
-      { onlyOnce: true }
-    );
+    onValue(limitedMessagesRef, (snapshot) => {
+      const messages = addScionsToMessages(snapshot);
+      setAmountOfMessagesToShow(amount);
+      setMessages(messages.reverse());
+    });
   }
 
   async function getTotalMessagesAmount() {
@@ -264,6 +267,7 @@ export default function Chat() {
           };
           await writeMessage(message);
           await setChatsForUsers(message);
+          getMessages(false);
         } catch (e) {
           console.log(e);
         }
@@ -361,7 +365,6 @@ export default function Chat() {
                 {messages.map((item) => (
                   <Message
                     id={item.id!}
-                    text={item.text}
                     key={item.createdAt as string}
                     isMine={item.authorId === currentUser!.uid}
                     hasScionOnTop={item.hasScionOnTop}
@@ -370,6 +373,7 @@ export default function Chat() {
                     controlsRef={controlsRef}
                     formRef={formRef}
                     resetControls={resetControls}
+                    text={item.text}
                   ></Message>
                 ))}
               </InfiniteScroll>
