@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Formik, Form, Field } from "formik";
@@ -12,7 +12,6 @@ import {
   serverTimestamp,
   onValue,
   off,
-  get,
   increment,
 } from "@firebase/database";
 import Avatar from "./Avatar";
@@ -52,7 +51,8 @@ export default function Chat() {
   const [messages, setMessages] = useState<MessageObject[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const messagesPerScroll = 20;
-  const [messagesToShow, setMessagesToShow] = useState(messagesPerScroll);
+  const [amountOfMessagesToShow, setAmountOfMessagesToShow] =
+    useState(messagesPerScroll);
   const [totalMessagesAmount, setTotalMessagesAmount] = useState(0);
   const [chat, setChat] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -64,21 +64,13 @@ export default function Chat() {
   const db = getDatabase();
   const path = getRefPathByUsersNames(currentUser!.uid, interlocutorId);
 
-  // const messagesWindowRef = useCallback(
-  //   (window) => {
-  //     if (window) {
-  //       window.scrollTop = window.scrollHeight;
-  //     }
-  //   },
-  //   [messages]
-  // );
   const controlsRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   const formRef = useRef() as React.MutableRefObject<HTMLFormElement>;
 
   async function writeMessage(message: MessageObject) {
-    const messageListRef = ref(db, "messages/" + path);
+    const messagesListRef = ref(db, "messages/" + path);
     const messagesCounterRef = ref(db, "counters/messages/" + path);
-    const newMessageRef = push(messageListRef);
+    const newMessageRef = push(messagesListRef);
     await set(messagesCounterRef, increment(1));
     return set(newMessageRef, message);
   }
@@ -90,8 +82,8 @@ export default function Chat() {
 
   async function watchChats() {
     const chatRef = ref(db, "chats/" + currentUser!.uid + "/" + path);
-    onValue(chatRef, (chat) => {
-      setChat(chat.val());
+    onValue(chatRef, (snapshot) => {
+      setChat(snapshot.val());
     });
   }
   async function setChatsForUsers(message: MessageObject) {
@@ -175,33 +167,22 @@ export default function Chat() {
     return messages;
   }
 
-  async function getMessages() {
+  async function getMessages(isCalledByNext: boolean) {
+    let amount = amountOfMessagesToShow;
+    if (isCalledByNext) {
+      amount += messagesPerScroll;
+    }
     const messagesRef = ref(db, "messages/" + path);
-    const limitedMessagesRef = query(
-      messagesRef,
-      limitToLast(messagesToShow + messagesPerScroll)
-    );
-
+    const limitedMessagesRef = query(messagesRef, limitToLast(amount));
     onValue(
       limitedMessagesRef,
       (snapshot) => {
         const messages = addScionsToMessages(snapshot);
-
-        setMessagesToShow((prev) => prev + messagesPerScroll);
-
+        setAmountOfMessagesToShow(amount);
         setMessages(messages.reverse());
       },
       { onlyOnce: true }
     );
-  }
-
-  async function watchMessages() {
-    const messagesRef = ref(db, "messages/" + path);
-    const limitedMessagesRef = query(messagesRef, limitToLast(messagesToShow));
-    onValue(limitedMessagesRef, (snapshot) => {
-      const messages = addScionsToMessages(snapshot);
-      setMessages(messages.reverse());
-    });
   }
 
   async function getTotalMessagesAmount() {
@@ -210,6 +191,7 @@ export default function Chat() {
       setTotalMessagesAmount(snapshot.val());
     });
   }
+
   function toggleEditing() {
     setIsEditing((isEditing) => !isEditing);
   }
@@ -217,10 +199,11 @@ export default function Chat() {
   function toggleDeleting() {
     setIsDeleting((isDeleting) => !isDeleting);
   }
+
   useEffect(() => {
     getTotalMessagesAmount();
-    console.log(totalMessagesAmount);
   }, []);
+
   useEffect(() => {
     readMessage();
   }, [chat]);
@@ -232,7 +215,7 @@ export default function Chat() {
     getUserData(currentUser!.uid).then((snapshot) =>
       setCurrentUserData(snapshot.val())
     );
-    watchMessages();
+    getMessages(false);
     watchChats();
     return () => {
       off(ref(db, "chat/" + path));
@@ -368,7 +351,7 @@ export default function Chat() {
                   width: "100%",
                   overflow: "inherit",
                 }}
-                next={getMessages}
+                next={getMessages.bind(null, true)}
                 inverse={true}
                 hasMore={totalMessagesAmount > messages.length}
                 loader={<Loader></Loader>}
