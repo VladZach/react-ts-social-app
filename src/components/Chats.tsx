@@ -5,6 +5,7 @@ import {
   orderByChild,
   query,
   ref,
+  Unsubscribe,
 } from "firebase/database";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
@@ -21,7 +22,7 @@ export default function Chats() {
   function watchLastChats() {
     const chatsRef = ref(db, "chats/" + currentUser!.uid);
     const refWithSort = query(chatsRef, orderByChild("createdAt"));
-    onValue(refWithSort, (snapshot) => {
+    return onValue(refWithSort, (snapshot) => {
       const lastMessages: MessageObject[] = [];
       snapshot.forEach((childSnapshot) => {
         lastMessages.push(childSnapshot.val());
@@ -31,12 +32,9 @@ export default function Chats() {
   }
 
   useEffect(() => {
-    watchLastChats();
+    const unsubscribe = watchLastChats();
     return () => {
-      // this actualy ruins message counter
-      //cause its also attached on chats/user
-      //    const chatsRef = ref(db, "chats/" + currentUser!.uid);
-      //  off(chatsRef);
+      unsubscribe();
     };
   }, []);
 
