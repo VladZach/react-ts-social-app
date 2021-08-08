@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import { cardMDFormValues } from "./Login";
-import { getDatabase, ref, set } from "firebase/database";
+import { getDatabase, increment, ref, set } from "firebase/database";
 import { ScepticGuyPageProps } from "./ScepticGuyPage";
 
 export interface cardLGFormValues extends cardMDFormValues {
@@ -57,6 +57,7 @@ export default function SignUp({
           try {
             const { user } = await signup(values.email, values.password);
             const db = getDatabase();
+            const usersCounterRef = ref(db, "counters/users/");
             const userRef = ref(db, "users/" + user!.uid);
             const userObj = {
               fullName: "",
@@ -64,7 +65,9 @@ export default function SignUp({
               aboutMe: "",
               whereFrom: "",
             };
+
             await set(userRef, userObj);
+            await set(usersCounterRef, increment(1));
             history.push("/update-profile");
           } catch (e) {
             setSubmissionError(e.message);
