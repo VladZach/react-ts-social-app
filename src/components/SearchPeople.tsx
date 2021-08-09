@@ -10,7 +10,7 @@ import {
   equalTo,
   limitToLast,
 } from "firebase/database";
-import React, { ReactElement, useEffect } from "react";
+import React, { ReactElement, useEffect, useRef } from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -26,7 +26,12 @@ export default function SearchPeople() {
   const [usersElementsList, setUsersElementsList] = useState<ReactElement[]>(
     []
   );
-  const [totalUsersAmount, setTotalUsersAmount] = useState(0);
+  const [foundUsersAmount, setFoundUsersAmount] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const prevUsersLengthRef = useRef(0);
+  const usersPerScroll = 10;
+  const [amountOfUsersToShow, setAmountOfUsersToShow] =
+    useState(usersPerScroll);
 
   const { currentUser } = useAuth();
   const db = getDatabase();
@@ -83,30 +88,16 @@ export default function SearchPeople() {
       endAt(queryText + "\uf8ff")
     );
     const byName = await get(searchedByName);
-    console.log(byName.val());
     setUsersData({ ...byName.val() });
   }
 
-  function getTotalUsersAmount() {
-    const counterRef = ref(db, "counters/users/");
-    onValue(
-      counterRef,
-      (snapshot) => {
-        setTotalUsersAmount(snapshot.val());
-      },
-      { onlyOnce: true }
-    );
-  }
-
   useEffect(() => {
-    getTotalUsersAmount();
+    getRandomUsers();
   }, []);
 
   useEffect(() => {
-    if (!totalUsersAmount) return;
-
-    getRandomUsers();
-  }, [totalUsersAmount]);
+    prevUsersLengthRef.current = usersElementsList.length;
+  });
 
   useEffect(() => {
     if (usersData) {

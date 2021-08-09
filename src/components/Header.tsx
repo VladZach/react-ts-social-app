@@ -1,12 +1,4 @@
-import {
-  getDatabase,
-  onValue,
-  ref,
-  off,
-  get,
-  onChildChanged,
-  onChildAdded,
-} from "firebase/database";
+import { getDatabase, onValue, ref, off } from "firebase/database";
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -18,27 +10,16 @@ export default function Header() {
 
   function watchMessagesCounter() {
     const chatsRef = ref(db, "chats/" + currentUser!.uid);
-    //for changes in already existing chats
-    onChildChanged(chatsRef, (chat) => {
-      //OnChildSomething-observers put in callback only that exactly
-      // child on which "Something" happened
-      getInitialMessagesCounter();
+
+    onValue(chatsRef, (chats) => {
+      let counter = 0;
+      chats.forEach((chat) => {
+        if (!chat.val().wasRed) {
+          counter++;
+        }
+      });
+      setMessagesCounter(counter);
     });
-    //for first message in newly created chat
-    onChildAdded(chatsRef, (chat) => {
-      getInitialMessagesCounter();
-    });
-  }
-  async function getInitialMessagesCounter() {
-    const chatsRef = ref(db, "chats/" + currentUser!.uid + "/");
-    const chats = await get(chatsRef);
-    let counter = 0;
-    chats.forEach((chat) => {
-      if (!chat.val().wasRed) {
-        counter++;
-      }
-    });
-    setMessagesCounter(counter);
   }
 
   useEffect(() => {
